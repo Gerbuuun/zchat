@@ -23,6 +23,7 @@ export const chats = pgTable(
     title: t.text().notNull(),
     description: t.text(),
     public: t.boolean().notNull(),
+    locked: t.boolean().notNull(),
     userId: t.text().notNull().references(() => users.id, { onDelete: 'cascade' }),
     createdAt: t.timestamp().notNull(),
     updatedAt: t.timestamp().notNull(),

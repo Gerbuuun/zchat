@@ -72,6 +72,7 @@ export default $config({
       dev: {
         command: 'npx zero-cache',
       },
+      capacity: 'spot',
       loadBalancer: {
         public: true,
         ports: [

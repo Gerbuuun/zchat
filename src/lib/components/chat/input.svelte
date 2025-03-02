@@ -1,9 +1,11 @@
 <script lang='ts'>
-  const { submit }: { submit: (message: string) => void } = $props();
+  const {
+    submit,
+    locked = false,
+  }: { submit: (message: string) => void; locked?: boolean } = $props();
 
   let message = $state('');
   let textarea: HTMLTextAreaElement;
-  let isSubmitting = $state(false);
 
   function handleKeydown(event: KeyboardEvent) {
     // Submit on Enter (without Shift)
@@ -14,28 +16,20 @@
   }
 
   async function submitMessage() {
-    if (!message.trim() || isSubmitting)
+    if (!message.trim() || locked)
       return;
 
-    isSubmitting = true;
+    submit(message.trim());
+    message = '';
 
-    try {
-      submit(message.trim());
-      message = '';
-
-      // Reset textarea height
-      if (textarea) {
-        textarea.style.height = 'auto';
-      }
-    }
-    finally {
-      isSubmitting = false;
+    // Reset textarea height
+    if (textarea) {
+      textarea.style.height = 'auto';
     }
   }
 
   function autoResize() {
     if (textarea) {
-      textarea.style.height = 'auto';
       textarea.style.height = `${textarea.scrollHeight}px`;
     }
   }
@@ -50,7 +44,7 @@
       oninput={autoResize}
       onkeydown={handleKeydown}
       placeholder='Type your message here...'
-      class='w-full resize-none overflow-hidden focus:outline-none min-h-[60px] max-h-[200px]'
+      class='w-full resize-none overflow-scroll focus:outline-none min-h-[60px] max-h-[200px]'
       rows='1'
       autofocus
     ></textarea>
@@ -61,10 +55,10 @@
       </div>
       <button
         onclick={submitMessage}
-        disabled={!message.trim() || isSubmitting}
+        disabled={!message.trim() || locked}
         class='px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed order-1 sm:order-2 w-full sm:w-auto'
       >
-        {isSubmitting ? 'Sending...' : 'Send'}
+        {locked ? 'Generating response...' : 'Send'}
       </button>
     </div>
   </div>

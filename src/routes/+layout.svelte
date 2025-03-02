@@ -22,9 +22,12 @@
     sidebarOpen = !sidebarOpen;
   };
 
-  // Preload user's chats
+  // Preload user and shared chats
   z.current.query.chats
-    .where('userId', z.current.userID)
+    .where(q => q.or(
+      q.cmp('userId', z.current.userID),
+      q.exists('chatAccess', q => q.where('userId', z.current.userID)),
+    ))
     .related('messages', q => q.related('chunks'))
     .related('chatAccess')
     .related('user')
@@ -40,9 +43,11 @@
     z.current.query.chats.whereExists('chatAccess', q =>
       q.where('userId', z.current.userID)),
   );
+
+  const authCookie = $derived(document.cookie.split('; ').find(row => row.startsWith('auth='))?.split('=')[1]);
 </script>
 
-<div class='min-h-screen bg-gray-100'>
+<div class='min-h-dvh bg-gray-100'>
   <!-- Sidebar (hidden on mobile) -->
   <aside class={`fixed inset-y-0 left-0 z-50 w-64 bg-gray-800 text-white ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 transition-transform duration-300 ease-in-out`}>
     <div class='h-16 px-4 border-b border-gray-700 flex justify-between items-center'>
@@ -148,19 +153,25 @@
         <Search />
 
         <!-- User profile and logout on desktop and mobile -->
-        {#if user.current}
+        {#if authCookie}
           <div class='flex items-center ml-auto'>
             <div class='flex items-center gap-4'>
               <span class='text-sm font-medium text-gray-700 hidden md:inline-block'>
-                {user.current.name}
+                {user.current?.name}
               </span>
               <img
-                src={user.current.avatarUrl}
+                src={user.current?.avatarUrl}
                 alt='Profile'
                 class='h-8 w-8 rounded-full object-cover mr-2'
               />
             </div>
-            <button class='p-2 rounded-md text-white bg-[#FF3E00] hover:bg-[#FF5722] focus:outline-none focus:ring-2 focus:ring-[#FF3E00] ml-2'>
+            <button 
+              class='p-2 rounded-md text-white bg-[#FF3E00] hover:bg-[#FF5722] focus:outline-none focus:ring-2 focus:ring-[#FF3E00] ml-2'
+              onclick={() => {
+                document.cookie = 'auth=; Path=/; Max-Age=0; SameSite=Lax';
+                window.location.href = '/';
+              }}
+            >
               Logout
             </button>
           </div>

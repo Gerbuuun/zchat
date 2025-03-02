@@ -1,0 +1,1 @@
+ALTER TABLE "chats" ADD COLUMN "locked" boolean NOT NULL;

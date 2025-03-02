@@ -1,5 +1,5 @@
 import type { Context } from 'hono';
-import { eq, sql } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import { Hono } from 'hono';
 import { handle } from 'hono/aws-lambda';
@@ -7,8 +7,7 @@ import { sign, verify } from 'hono/jwt';
 import postgres from 'postgres';
 import { Resource } from 'sst';
 import { ulid } from 'ulid';
-import * as v from 'valibot';
-import { chats, messageChunks, messages, users } from '../database/schema';
+import { chatAccess, chats, messageChunks, messages, users } from '../database/schema';
 import { generateTitle, streamChunkedParagraphs } from './openai';
 
 function getDB() {
@@ -134,7 +133,7 @@ app.get('/callback', async (c: Context) => {
   }
 });
 
-app.post('/chat/:id', async (c: Context) => {
+app.get('/chat/:id', async (c: Context) => {
   const id = c.req.param('id');
   const jwt = c.req.header('Cookie')?.split('; ').find(row => row.startsWith('auth='))?.split('=')[1];
 
@@ -150,41 +149,22 @@ app.post('/chat/:id', async (c: Context) => {
 
   const db = getDB();
 
-  const [
-    body,
-    [chat],
-    [user],
-  ] = await Promise.all([
-    c.req.json(),
-    db.select().from(chats).where(eq(chats.id, id)),
-    db.select().from(users).where(eq(users.id, payload.sub as string)),
-  ]);
+  // Check if the chat exists and the user has write access to it
+  const [chat] = await db
+    .select({
+      id: chats.id,
+      title: chats.title,
+      userId: chats.userId,
+      access: sql<string[]>`coalesce(array_agg(${chatAccess.userId}) filter (where ${chatAccess.userId} is not null), '{}')`.as('access'),
+    })
+    .from(chats)
+    .where(eq(chats.id, id))
+    .leftJoin(chatAccess, and(eq(chatAccess.chatId, chats.id), eq(chatAccess.write, true)))
+    .groupBy(chats.id);
 
-  if (!chat) {
-    return c.json({ error: 'Chat not found' }, 404);
-  }
-
-  if (!user) {
+  if (!chat || (chat.userId !== payload.sub && !chat.access.includes(payload.sub as string))) {
     return c.json({ error: 'Unauthorized' }, 401);
   }
-
-  const parsed = v.parse(v.object({
-    message: v.pipe(v.string(), v.minLength(1)),
-  }), body);
-
-  const messageId = ulid();
-  await db.insert(messages).values({
-    id: messageId,
-    chatId: chat.id,
-    userId: user.id,
-    role: 'user',
-    createdAt: new Date(),
-  });
-  await db.insert(messageChunks).values({
-    messageId,
-    index: 0,
-    content: parsed.message,
-  });
 
   try {
     // Get all previous messages for context
@@ -195,15 +175,16 @@ app.post('/chat/:id', async (c: Context) => {
         content: sql<string>`string_agg(${messageChunks.content}, '')`.as('content'),
       })
       .from(messages)
-      .where(eq(messages.chatId, chat.id))
+      .where(eq(messages.chatId, id))
       .innerJoin(messageChunks, eq(messages.id, messageChunks.messageId))
       .groupBy(messages.id);
 
     // Create AI message in database first
+    // TODO: Also do this on the client side for even more local first feel
     const assistantMessageId = ulid();
     await db.insert(messages).values({
       id: assistantMessageId,
-      chatId: chat.id,
+      chatId: id,
       role: 'assistant',
       createdAt: new Date(),
     });
@@ -214,14 +195,17 @@ app.post('/chat/:id', async (c: Context) => {
     // Generate title
     if (chat.title === 'New Chat') {
       const title = await generateTitle(chatMessages[0]);
-      await db.update(chats).set({ title }).where(eq(chats.id, chat.id));
+      await db.update(chats).set({ title }).where(eq(chats.id, id));
     }
-
     return c.json({ success: true });
   }
   catch (error) {
     console.error('Error generating AI response:', error);
     return c.json({ error: 'Failed to process request' }, 500);
+  }
+  finally {
+    // Unlock the chat
+    await db.update(chats).set({ locked: false }).where(eq(chats.id, id));
   }
 });
 

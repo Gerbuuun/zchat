@@ -51,6 +51,15 @@ importers:
       hono:
         specifier: ^4.7.2
         version: 4.7.2
+      micromark:
+        specifier: ^4.0.2
+        version: 4.0.2
+      micromark-extension-gfm:
+        specifier: ^3.0.0
+        version: 3.0.0
+      micromark-extension-gfm-table:
+        specifier: ^2.1.1
+        version: 2.1.1
       openai:
         specifier: ^4.86.1
         version: 4.86.1(ws@8.18.1)
@@ -69,9 +78,6 @@ importers:
       ulid:
         specifier: ^2.3.0
         version: 2.3.0
-      valibot:
-        specifier: 1.0.0-rc.2
-        version: 1.0.0-rc.2(typescript@5.7.3)
       vite:
         specifier: ^6.2.0
         version: 6.2.0(@types/node@22.13.5)(jiti@2.4.2)(lightningcss@1.29.1)(tsx@4.19.3)(yaml@2.7.0)

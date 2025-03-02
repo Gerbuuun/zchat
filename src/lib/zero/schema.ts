@@ -39,6 +39,7 @@ const chat = table('chats')
     title: string(),
     description: string().optional(),
     public: boolean(),
+    locked: boolean(),
     userId: string(),
     createdAt: number(),
     updatedAt: number(),
@@ -167,20 +168,25 @@ interface AuthData {
   sub: string;
 }
 
-// Chat
-function ownsChat(authData: AuthData, eb: ExpressionBuilder<Schema, 'chats'>) {
+// User
+function isOwnedByUser(authData: AuthData, eb: ExpressionBuilder<Schema, 'chats' | 'chat_access' | 'messages'>) {
   return eb.cmp('userId', authData.sub);
 }
 
+// Chat
 function canReadChat(authData: AuthData, eb: ExpressionBuilder<Schema, 'chats'>) {
   return eb.or(
     eb.exists('chatAccess', q => q.where('userId', authData.sub)),
+    isOwnedByUser(authData, eb),
     eb.cmp('public', true),
   );
 }
 
 function canWriteToChat(authData: AuthData, eb: ExpressionBuilder<Schema, 'chats'>) {
-  return eb.exists('chatAccess', q => q.where('userId', authData.sub).where('write', true));
+  return eb.or(
+    eb.exists('chatAccess', q => q.where('userId', authData.sub).where('write', true)),
+    isOwnedByUser(authData, eb),
+  );
 }
 
 // Chat Access
@@ -194,16 +200,28 @@ function canWriteInSameChat(authData: AuthData, eb: ExpressionBuilder<Schema, 'c
 
 // Messages
 function canWriteMessages(authData: AuthData, eb: ExpressionBuilder<Schema, 'messages'>) {
-  return eb.exists('chat', q => q.where(eq => eq.or(canWriteToChat(authData, eq), ownsChat(authData, eq))));
+  return eb.exists('chat', q => q.where(eq => canWriteToChat(authData, eq)));
 }
 
 function canReadMessages(authData: AuthData, eb: ExpressionBuilder<Schema, 'messages'>) {
-  return eb.exists('chat', q => q.where(eq => eq.or(canReadChat(authData, eq), ownsChat(authData, eq))));
+  return eb.exists('chat', q => q.where(eq => canReadChat(authData, eq)));
+}
+
+function chatIsNotLocked(authData: AuthData, eb: ExpressionBuilder<Schema, 'messages'>) {
+  return eb.exists('chat', q => q.where(eq => eq.cmp('locked', false)));
 }
 
 // Message Chunks
 function canReadMessageChunks(authData: AuthData, eb: ExpressionBuilder<Schema, 'message_chunks'>) {
-  return eb.exists('message', q => q.where(eq => eq.or(canReadMessages(authData, eq))));
+  return eb.exists('message', q => q.where(eq => canReadMessages(authData, eq)));
+}
+
+function canWriteMessageChunks(authData: AuthData, eb: ExpressionBuilder<Schema, 'message_chunks'>) {
+  return eb.exists('message', q => q.where('userId', authData.sub));
+}
+
+function messageIsNotLocked(authData: AuthData, eb: ExpressionBuilder<Schema, 'message_chunks'>) {
+  return eb.exists('message', q => q.whereExists('chat', eq => eq.where('locked', false)));
 }
 
 export const permissions = definePermissions<AuthData, typeof schema>(schema, () => ({
@@ -220,13 +238,13 @@ export const permissions = definePermissions<AuthData, typeof schema>(schema, ()
   },
   chats: {
     row: {
-      select: [ownsChat, canReadChat],
-      insert: [ownsChat, canWriteToChat],
+      select: [canReadChat],
+      insert: [canWriteToChat],
       update: {
-        preMutation: [ownsChat, canWriteToChat],
-        postMutation: [ownsChat, canWriteToChat],
+        preMutation: [canWriteToChat],
+        postMutation: [canWriteToChat],
       },
-      delete: [ownsChat],
+      delete: [isOwnedByUser],
     },
   },
   chat_access: {
@@ -243,18 +261,18 @@ export const permissions = definePermissions<AuthData, typeof schema>(schema, ()
   messages: {
     row: {
       select: [canReadMessages],
-      insert: [canWriteMessages],
+      insert: [canWriteMessages, chatIsNotLocked],
       update: {
-        preMutation: [canWriteMessages],
-        postMutation: [canWriteMessages],
+        preMutation: [canWriteMessages, chatIsNotLocked],
+        postMutation: [canWriteMessages, chatIsNotLocked],
       },
-      delete: [canWriteMessages],
+      delete: [canWriteMessages, chatIsNotLocked],
     },
   },
   message_chunks: {
     row: {
       select: [canReadMessageChunks],
-      insert: NOBODY_CAN,
+      insert: [canWriteMessageChunks, messageIsNotLocked],
       update: {
         preMutation: NOBODY_CAN,
         postMutation: NOBODY_CAN,
