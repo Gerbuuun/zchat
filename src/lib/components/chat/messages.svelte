@@ -56,7 +56,7 @@
         : 'bg-gray-200 text-gray-800 mr-auto self-start'} max-w-[80%]"
       in:fly={flyConfig(i)}
     >
-      <p class='flex font-bold capitalize mb-4 items-center justify-between border-b {message.role === 'user' ? 'border-gray-500' : 'border-white'} pb-2'>
+      <p class='flex font-bold capitalize mb-4 items-center justify-between border-b {message.role === 'user' && !isUser ? 'border-gray-500' : 'border-white'} pb-2'>
         <span>{message.role === 'user' ? message.user?.name : 'Assistant'}</span>
         <span class='text-xs'>
           {new Date(message.createdAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
