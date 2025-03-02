@@ -1,0 +1,55 @@
+{
+  "name": "zchat-web",
+  "type": "module",
+  "version": "0.0.1",
+  "private": true,
+  "packageManager": "pnpm@10.5.1",
+  "scripts": {
+    "build": "vite build",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "dev": "vite dev",
+    "dev:zero-cache": "npx zero-cache",
+    "prepare": "svelte-kit sync || echo ''",
+    "preview": "vite preview",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
+    "sso": "aws sso login --sso-session=kanrilabs"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.40.0",
+    "postgres": "^3.4.5",
+    "sst": "3.9.19"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^4.3.0",
+    "@rocicorp/zero": "^0.16.2025022800",
+    "@sveltejs/adapter-static": "^3.0.8",
+    "@sveltejs/kit": "^2.17.3",
+    "@sveltejs/vite-plugin-svelte": "^5.0.3",
+    "@tailwindcss/vite": "^4.0.9",
+    "drizzle-kit": "^0.30.5",
+    "eslint": "^9.21.0",
+    "eslint-plugin-svelte": "^3.0.2",
+    "hono": "^4.7.2",
+    "openai": "^4.86.1",
+    "svelte": "^5.20.5",
+    "svelte-check": "^4.1.4",
+    "tailwindcss": "^4.0.9",
+    "typescript": "^5.7.3",
+    "ulid": "^2.3.0",
+    "valibot": "1.0.0-rc.2",
+    "vite": "^6.2.0",
+    "zero-svelte": "^0.2.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@rocicorp/zero-sqlite3",
+      "esbuild",
+      "protobufjs"
+    ],
+    "overrides": {
+      "@rocicorp/zero": "^0.16.2025022800"
+    }
+  }
+}
