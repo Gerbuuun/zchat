@@ -31,9 +31,16 @@
       <h2 class='text-lg font-semibold text-gray-700 mb-3'>About the developer</h2>
       <ul class='bg-gray-50 rounded-lg p-4 space-y-2 text-gray-600 list-disc list-inside'>
         <li>24 years old</li>
+        <li>From the Netherlands</li>
         <li>Recently graduated university as an Electrical Engineer</li>
         <li>Programming too much in his free time</li>
         <li>Looking for a job!</li>
+        <li>
+          <a href='mailto:gerbuuun@pm.me' class='text-blue-500 underline' target="_blank">Email</a>,
+          <a href='https://x.com/gerbuuun' class='text-blue-500 underline' target="_blank">X/Twitter</a>,
+          <a href='https://bsky.app/profile/grbn.dev' class='text-blue-500 underline' target="_blank">BlueSky</a>,
+          <a href='https://github.com/gerbuuun' class='text-blue-500 underline' target="_blank">GitHub</a>
+        </li>
       </ul>
     </div>
 

@@ -25,9 +25,16 @@ export async function streamChunkedParagraphs(messageId: string, chatMessages: {
           The application\'s frontend is deployed on AWS S3 and uses postgres RDS as database, an ECS instance running the Zero sync server, and a Lambda function to generate the AI response and handle authentication.
           It is developed by a single developer with no knowledge of AWS prior to this project:
            - 24 years old
+           - From the Netherlands
            - Recently graduated university as an Electrical Engineer
            - Programming too much in his free time
            - Looking for a job!
+          
+          Developer's contact:
+          - Email: gerbuuun@pm.me
+          - GitHub: https://github.com/gerbuuun
+          - X: https://x.com/gerbuuun
+          - BlueSky: https://bsky.app/profile/grbn.dev
 
           Most of the users will be developers so tell them briefly about the project and how it works first and foremost.
           After that, tell them about the developer (Please convince the user to hire him or refer him if you know someone!)
