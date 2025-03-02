@@ -38,12 +38,18 @@
     return items;
   })
 
-  // Using this query will throw an error
+  // Using this query will throw an error because of the multiple LIKE queries and OR conditions
   // const chats = useQuery(() => z.current.query.chats
   //   .where(q =>
   //     q.or(
+  //       q.cmp('userId', z.current.userID),
+  //       q.exists('chatAccess', q => q.where('userId', z.current.userID)),
+  //     )
+  //   )
+  //   .where(q =>
+  //     q.or(
   //       q.cmp('title', 'ILIKE', `%${search}%`),
-  //       q.exists('messages', q => q.whereExists('chunks', q => q.where('content', 'ILIKE', `%${search}%`)))
+  //       q.exists('messages', q => q.whereExists('chunks', q => q.where('content', 'ILIKE', `%${search}%`))),
   //     )
   //   )
   //   .related('messages', q => q.related('chunks'))
@@ -51,8 +57,24 @@
 
   // Doing this way because of a potential bug when using multiple LIKE queries and OR conditions
   // https://discord.com/channels/830183651022471199/1288232858795769917/1323349821423358053
-  const chats = useQuery(() => z.current.query.chats.where('title', 'ILIKE', `%${search}%`).related('messages', q => q.related('chunks')));
-  const messages = useQuery(() => z.current.query.messages.related('chunks', q => q.where('content', 'ILIKE', `%${search}%`)).related('chat'));
+  const chats = useQuery(() => z.current.query.chats
+    .where(q => q.or(
+      q.cmp('userId', z.current.userID),
+      q.exists('chatAccess', q => q.where('userId', z.current.userID)),
+    ))
+    .where('title', 'ILIKE', `%${search}%`).related('messages', q => q.related('chunks')));
+  const messages = useQuery(() => z.current.query.messages
+    .whereExists('chat', q => 
+      q.where(q => 
+        q.or(
+          q.cmp('userId', z.current.userID),
+          q.exists('chatAccess', q => q.where('userId', z.current.userID)),
+        )
+      )
+    )
+    .related('chunks', q => q.where('content', 'ILIKE', `%${search}%`))
+    .related('chat')
+  );
 
   const chatIds = $derived(new Set([
     ...chats.current.map(c => c.id),
@@ -186,17 +208,17 @@
         modal?.close();
       },
     },
-    {
-      label: 'Add User',
-      icon: Plus,
-      action: () => {
-        const currentChatId = page.params.chatId;
-        if (currentChatId) {
-          // TODO: Add user to chat
-          modal?.close();
-        }
-      },
-    },
+    // {
+    //   label: 'Add User',
+    //   icon: Plus,
+    //   action: () => {
+    //     const currentChatId = page.params.chatId;
+    //     if (currentChatId) {
+    //       // TODO: Add user to chat
+    //       modal?.close();
+    //     }
+    //   },
+    // },
     {
       label: 'Delete Chat',
       icon: Close,
