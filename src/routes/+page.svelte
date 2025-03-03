@@ -16,22 +16,23 @@
   <div class='flex flex-col items-center justify-center p-2 md:p-6 space-y-8 h-full'>
     <h1 class='text-3xl font-bold text-gray-800'>Welcome to ZChat!</h1>
 
-
     <div class='w-full max-w-lg'>
       <h2 class='text-lg font-semibold text-gray-700 mb-3'>About the project</h2>
       <ul class='bg-gray-50 rounded-lg p-4 space-y-2 text-gray-600 list-disc list-inside'>
         <li>Svelte frontend deployed on AWS S3</li>
         <li>Zero sync server running on ECS with RDS as database</li>
         <li>Lambda function to generate LLM responses and handle auth</li>
+        <li>Lambda is invoked by RDS on user message insert</li>
+        <li><b>All</b> data communication is handled through Zero</li>
         <li>Cloudflare DNS and proxy</li>
+        <li>Fully deployed via SST, only need to run migrations</li>
       </ul>
     </div>
 
     <div class='w-full max-w-lg'>
       <h2 class='text-lg font-semibold text-gray-700 mb-3'>About the developer</h2>
       <ul class='bg-gray-50 rounded-lg p-4 space-y-2 text-gray-600 list-disc list-inside'>
-        <li>24 years old</li>
-        <li>From the Netherlands</li>
+        <li>24 years old, from the Netherlands</li>
         <li>Recently graduated university as an Electrical Engineer</li>
         <li>Programming too much in his free time</li>
         <li>Looking for a job!</li>

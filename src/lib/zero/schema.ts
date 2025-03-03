@@ -19,8 +19,8 @@ const users = table('users')
   .columns({
     id: string(),
     name: string(),
-    email: string(),
-    avatarUrl: string(),
+    username: string(),
+    githubId: string(),
   })
   .primaryKey('id');
 
@@ -183,9 +183,12 @@ function canReadChat(authData: AuthData, eb: ExpressionBuilder<Schema, 'chats'>)
 }
 
 function canWriteToChat(authData: AuthData, eb: ExpressionBuilder<Schema, 'chats'>) {
-  return eb.or(
-    eb.exists('chatAccess', q => q.where('userId', authData.sub).where('write', true)),
-    isOwnedByUser(authData, eb),
+  return eb.and(
+    eb.cmp('locked', false),
+    eb.or(
+      eb.exists('chatAccess', q => q.where('userId', authData.sub).where('write', true)),
+      isOwnedByUser(authData, eb),
+    ),
   );
 }
 
@@ -207,33 +210,33 @@ function canReadMessages(authData: AuthData, eb: ExpressionBuilder<Schema, 'mess
   return eb.exists('chat', q => q.where(eq => canReadChat(authData, eq)));
 }
 
-function chatIsNotLocked(authData: AuthData, eb: ExpressionBuilder<Schema, 'messages'>) {
-  return eb.exists('chat', q => q.where(eq => eq.cmp('locked', false)));
-}
-
 // Message Chunks
 function canReadMessageChunks(authData: AuthData, eb: ExpressionBuilder<Schema, 'message_chunks'>) {
   return eb.exists('message', q => q.where(eq => canReadMessages(authData, eq)));
 }
 
 function canWriteMessageChunks(authData: AuthData, eb: ExpressionBuilder<Schema, 'message_chunks'>) {
-  return eb.exists('message', q => q.where('userId', authData.sub));
+  return eb.exists('message', q => 
+    q.where(eq => 
+      eq.and(
+        eq.cmp('userId', authData.sub),
+        eq.exists('chat', eq => eq.where('locked', false)),
+      ),
+    ),
+  );
 }
 
-function messageIsNotLocked(authData: AuthData, eb: ExpressionBuilder<Schema, 'message_chunks'>) {
-  return eb.exists('message', q => q.whereExists('chat', eq => eq.where('locked', false)));
-}
 
 export const permissions = definePermissions<AuthData, typeof schema>(schema, () => ({
   users: {
     row: {
       select: ANYONE_CAN,
-      insert: NOBODY_CAN, // Only the api can create users
+      insert: ANYONE_CAN,
       update: {
-        preMutation: NOBODY_CAN, // Is updated by the api
-        postMutation: NOBODY_CAN, // Is updated by the api
+        preMutation: NOBODY_CAN,
+        postMutation: NOBODY_CAN,
       },
-      delete: NOBODY_CAN, // Is deleted by the api
+      delete: NOBODY_CAN,
     },
   },
   chats: {
@@ -261,18 +264,18 @@ export const permissions = definePermissions<AuthData, typeof schema>(schema, ()
   messages: {
     row: {
       select: [canReadMessages],
-      insert: [canWriteMessages, chatIsNotLocked],
+      insert: [canWriteMessages],
       update: {
-        preMutation: [canWriteMessages, chatIsNotLocked],
-        postMutation: [canWriteMessages, chatIsNotLocked],
+        preMutation: [canWriteMessages],
+        postMutation: [canWriteMessages],
       },
-      delete: [canWriteMessages, chatIsNotLocked],
+      delete: [canWriteMessages],
     },
   },
   message_chunks: {
     row: {
       select: [canReadMessageChunks],
-      insert: [canWriteMessageChunks, messageIsNotLocked],
+      insert: [canWriteMessageChunks],
       update: {
         preMutation: NOBODY_CAN,
         postMutation: NOBODY_CAN,

@@ -20,24 +20,6 @@
   let selectedIndex = $state(0);
   let modal = $state<HTMLDialogElement | null>(null);
 
-  const navigableItems = $derived.by(() => {
-    const items: Array<{ type: 'shortcut' | 'chat', index: number }> = [];
-    
-    // Add shortcuts
-    filteredShortcuts.forEach((_, index) => {
-      items.push({ type: 'shortcut', index });
-    });
-    
-    // Add chats
-    if (search.length > 0 && chats.current.length > 0) {
-      chats.current.forEach((_, index) => {
-        items.push({ type: 'chat', index });
-      });
-    }
-    
-    return items;
-  })
-
   // Using this query will throw an error because of the multiple LIKE queries and OR conditions
   // const chats = useQuery(() => z.current.query.chats
   //   .where(q =>
@@ -58,21 +40,25 @@
   // Doing this way because of a potential bug when using multiple LIKE queries and OR conditions
   // https://discord.com/channels/830183651022471199/1288232858795769917/1323349821423358053
   const chats = useQuery(() => z.current.query.chats
-    .where(q => q.or(
-      q.cmp('userId', z.current.userID),
-      q.exists('chatAccess', q => q.where('userId', z.current.userID)),
-    ))
-    .where('title', 'ILIKE', `%${search}%`).related('messages', q => q.related('chunks')));
+    .where(q =>
+      q.or(
+        q.cmp('userId', z.current.userID),
+        q.exists('chatAccess', q => q.where('userId', z.current.userID)),
+      ),
+    )
+    .where('title', 'ILIKE', `%${search}%`)
+    .related('messages', q => q.related('chunks')));
   const messages = useQuery(() => z.current.query.messages
     .whereExists('chat', q => 
       q.where(q => 
         q.or(
           q.cmp('userId', z.current.userID),
           q.exists('chatAccess', q => q.where('userId', z.current.userID)),
-        )
-      )
+        ),
+      ),
     )
-    .related('chunks', q => q.where('content', 'ILIKE', `%${search}%`))
+    .whereExists('chunks', q => q.where('content', 'ILIKE', `%${search}%`))
+    .related('chunks')
     .related('chat')
   );
 
@@ -81,6 +67,25 @@
     ...messages.current.map(m => m.chatId)
   ]));
   const matchedChats = useQuery(() => z.current.query.chats.where('id', 'IN', Array.from(chatIds)).related('messages', q => q.related('chunks')));
+
+
+  const navigableItems = $derived.by(() => {
+    const items: Array<{ type: 'shortcut' | 'chat', index: number }> = [];
+    
+    // Add shortcuts
+    filteredShortcuts.forEach((_, index) => {
+      items.push({ type: 'shortcut', index });
+    });
+    
+    // Add chats
+    if (search.length > 0 && matchedChats.current.length > 0) {
+      matchedChats.current.forEach((_, index) => {
+        items.push({ type: 'chat', index });
+      });
+    }
+    
+    return items;
+  })
 
   // Handle navigation with arrow keys
   function handleNavigation(direction: 'up' | 'down') {

@@ -20,5 +20,5 @@ export const z = new Z({
   auth: () => token,
   server: PUBLIC_SERVER,
   schema,
-  kvStore: 'mem',
+  kvStore: 'idb',
 });

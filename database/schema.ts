@@ -1,4 +1,4 @@
-import { index, pgTable, primaryKey } from 'drizzle-orm/pg-core';
+import { index, pgTable, primaryKey, uniqueIndex } from 'drizzle-orm/pg-core';
 
 // User table
 export const users = pgTable(
@@ -7,11 +7,11 @@ export const users = pgTable(
     id: t.text().primaryKey(),
     githubId: t.text().notNull(),
     name: t.text().notNull(),
-    email: t.text().notNull(),
-    avatarUrl: t.text().notNull(),
+    username: t.text().notNull(),
   }),
   table => [
-    index().on(table.githubId),
+    uniqueIndex().on(table.githubId),
+    uniqueIndex().on(table.username),
   ],
 );
 

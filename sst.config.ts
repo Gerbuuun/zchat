@@ -1,7 +1,11 @@
 /// <reference path="./.sst/platform/config.d.ts" />
 
+import * as postgresql from '@pulumi/postgresql';
+import * as aws from '@pulumi/aws';
+
 const svelteDomain = 'zchat.grbn.dev';
 const zeroDomain = 'zchat-zero.grbn.dev';
+const awsRegion = 'us-east-1';
 
 const cacheDisabled = {
   /**
@@ -23,10 +27,11 @@ export default $config({
       home: 'aws',
       providers: {
         aws: {
-          region: 'us-east-1',
+          region: awsRegion,
           profile: input.stage === 'production' ? 'kanrilabs-production' : 'kanrilabs-dev',
         },
         command: '1.0.2',
+        postgresql: '3.14.0',
       },
     };
   },
@@ -64,6 +69,7 @@ export default $config({
         },
       },
     });
+
     const cluster = new sst.aws.Cluster('Cluster', { vpc });
     const connection = $interpolate`postgres://${db.username}:${db.password}@${db.host}:${db.port}`;
     const zero = new sst.aws.Service('Zero', {
@@ -100,14 +106,23 @@ export default $config({
     const apiFunction = new sst.aws.Function('Api', {
       vpc,
       runtime: 'nodejs22.x',
-      memory: '512 MB',
+      memory: '256 MB',
       architecture: 'arm64',
-      handler: 'api/index.handler',
-      link: [githubClientID, githubClientSecret, jwtSecret, db, openaiApiKey],
+      handler: 'api/auth.handler',
+      link: [githubClientID, githubClientSecret, jwtSecret, db],
       environment: {
         SPA_DOMAIN: svelteDomain,
       },
       url: true,
+    });
+
+    const llmFunction = new sst.aws.Function('LLM', {
+      vpc,
+      runtime: 'nodejs22.x',
+      memory: '256 MB',
+      architecture: 'arm64',
+      handler: 'api/llm.handler',
+      link: [db, openaiApiKey],
     });
 
     // From Discord: https://discord.com/channels/983865673656705025/1326997110440198155/1328686549830996081
@@ -175,6 +190,68 @@ export default $config({
       },
       { dependsOn: zero },
     );
+
+    const provider = new postgresql.Provider('DatabasePostgresProvider', {
+      host: db.host,
+      port: db.port,
+      database: db.database,
+      username: db.username,
+      password: db.password,
+    });
+
+    new postgresql.Extension('DatabaseLambdaExtension', {
+      name: 'aws_lambda',
+      createCascade: true,
+      dropCascade: true,
+    }, { provider });
+
+    new postgresql.Function('DatabaseLambdaTrigger', {
+      name: 'rds_lambda_trigger',
+      body: $interpolate`DECLARE
+    new_message record;
+BEGIN
+    SELECT "role", "chatId" FROM messages WHERE id = NEW."messageId" INTO new_message;
+
+    -- Only proceed if the role is 'user'
+    IF new_message.role = 'user' THEN
+        -- Invoke Lambda function with the new row data
+        PERFORM aws_lambda.invoke(
+            aws_commons.create_lambda_function_arn(
+                '${llmFunction.arn}',
+                '${awsRegion}'
+            ),
+            json_build_object('chatId', new_message."chatId"),
+            'Event'
+        );
+    END IF;
+    RETURN NEW;
+END;`,
+      language: 'plpgsql',
+      schema: 'public',
+      returns: 'trigger',
+    }, { provider });
+
+    const rdsLambdaTriggerRole = new aws.iam.Role('DatabaseLambdaTriggerRole', {
+      description: 'Role for RDS to invoke LLM Lambda function',
+      assumeRolePolicy: aws.iam.assumeRolePolicyForPrincipal({
+        Service: 'rds.amazonaws.com',
+      }),
+      inlinePolicies: [{
+        name: 'inline',
+        policy: aws.iam.getPolicyDocumentOutput({
+          statements: [{
+            actions: ['lambda:InvokeFunction'],
+            resources: [llmFunction.arn],
+          }],
+        }).json,
+      }]
+    });
+
+    new aws.rds.RoleAssociation('DatabaseLambdaTriggerRoleAssociation', {
+      dbInstanceIdentifier: db.id,
+      featureName: 'Lambda',
+      roleArn: rdsLambdaTriggerRole.arn,
+    });
 
     return {
       connection: $interpolate`${connection}/${db.database}`,

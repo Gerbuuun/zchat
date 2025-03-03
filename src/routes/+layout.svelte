@@ -160,7 +160,7 @@
                 {user.current?.name}
               </span>
               <img
-                src={user.current?.avatarUrl}
+                src={`https://github.com/${user.current?.username}.png`}
                 alt='Profile'
                 class='h-8 w-8 rounded-full object-cover mr-2'
               />

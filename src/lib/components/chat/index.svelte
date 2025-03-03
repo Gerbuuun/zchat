@@ -12,7 +12,11 @@
 
   const { chatId }: { chatId: string } = $props();
 
-  const chat = useQuery(() => z.current.query.chats.where('id', chatId).related('chatAccess').one());
+  const chat = useQuery(() => z.current.query.chats
+    .where('id', chatId)
+    .related('chatAccess', q => q.related('user'))
+    .one()
+  );
 
   let enableAnimations = $state(false);
 
@@ -54,8 +58,6 @@
       });
 
       enableAnimations = true;
-      // Trigger the api to start generating the response
-      fetch(`/api/chat/${chatId}`);
     }
     catch (error) {
       console.error(error);
@@ -79,7 +81,24 @@
           {chat.current?.title ?? 'New Chat'}
         </h2>
       {/key}
-      <!-- <ChatUsers {chatId} /> -->
+
+      <div class="flex items-center gap-2">
+        <div class='flex -space-x-2 overflow-hidden'>
+          {#each chat.current?.chatAccess ?? [] as share}
+            {#if share.user}
+              <div class='inline-block size-8 rounded-full ring-2 ring-white overflow-hidden bg-gray-200'>
+                <img
+                  src={`https://github.com/${share.user.username}.png`}
+                  alt={share.user.name || 'User'}
+                  class='h-full w-full object-cover'
+                />
+              </div>
+            {/if}
+          {/each}
+        </div>
+  
+        <ChatUsers {chatId} />
+      </div>
     </div>
   </Card>
 
