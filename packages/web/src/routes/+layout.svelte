@@ -110,7 +110,7 @@
   {/if}
 {/snippet}
 
-<div class='min-h-dvh bg-gray-100'>
+<div class='min-h-dvh bg-gray-200'>
   <!-- Sidebar (hidden on mobile) -->
   <aside class='fixed left-0 inset-y-0 z-50 w-64 bg-gray-800 text-white {sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 transition-transform duration-300 ease-in-out'>
     <div class='h-16 px-4 border-b border-gray-700 flex justify-between items-center'>

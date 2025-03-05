@@ -51,28 +51,34 @@
 
   function messageClass(message: Message) {
     if (message.userId === z.current.userID)
-      return 'bg-blue-500 text-white ml-auto self-end';
+      return 'bg-blue-500/30 ml-auto self-end';
     if (message.role === 'assistant')
-      return 'bg-orange-500 text-white mr-auto self-start';
-    return 'bg-gray-200 text-gray-800 mr-auto self-start';
+      return 'bg-orange-500/30 mr-auto self-start';
+    return 'bg-gray-200 text-gray-700 mr-auto self-start';
   }
 </script>
 
 <div class='flex-1 overflow-y-scroll space-y-2 md:space-y-4 bg-white rounded-lg shadow-md p-2 md:p-4' bind:this={chatContainer}>
   {#each messages.current as message (message.id)}
-    {@const isUser = message.userId === z.current.userID}
     <div
-      class='rounded-lg p-3 md:p-4 shadow-md transition-all duration-300 overflow-hidden {messageClass(message)} max-w-[80%]'
+      class='rounded-lg p-3 md:p-4 shadow-md transition-all duration-300 overflow-hidden {messageClass(message)} max-w-[95%] md:max-w-[80%]'
       in:fly={{ duration: animate ? 100 : 0 }}
     >
-      <p class='flex font-bold capitalize mb-2 md:mb-4 items-center justify-between border-b {message.role === 'user' && !isUser ? 'border-gray-500' : 'border-white'} pb-2 gap-2'>
-        <span class='truncate'>{message.role === 'user' ? message.user?.name : 'Assistant'}</span>
-        <span class='flex-shrink-0 text-xs'>
-          {new Date(message.createdAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+      <p class='flex font-bold capitalize mb-2 md:mb-4 items-center justify-between border-b border-gray-700 pb-2 gap-2'>
+        <span class='inline-flex gap-2 items-center'>
+          <img
+            src={message.user ? `https://github.com/${message.user.username}.png` : '/favicon.png'}
+            alt={message.user?.name}
+            class='flex-shrink-0 size-5 rounded-full'
+          />
+          <span class='truncate'>{message.role === 'user' ? message.user?.name : 'Assistant'}</span>
+        </span>
+        <span class='flex-shrink-0 text-xs text-gray-700'>
+          {new Date(message.createdAt).toLocaleTimeString(undefined, { timeStyle: 'short' })}
         </span>
       </p>
 
-      <div class='overflow-x-scroll'>
+      <div class='prose prose-sm md:prose-base marker:text-gray-700 overflow-x-scroll'>
         <Markdown content={message.chunks.map(chunk => chunk.content).join('')} />
       </div>
     </div>

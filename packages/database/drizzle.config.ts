@@ -2,8 +2,8 @@ import { defineConfig } from 'drizzle-kit';
 import { Resource } from 'sst';
 
 export default defineConfig({
-  schema: './src/database/schema.ts',
-  out: './src/database/migrations',
+  schema: './src/schema.ts',
+  out: './src/migrations',
   dbCredentials: {
     ssl: {
       rejectUnauthorized: false,

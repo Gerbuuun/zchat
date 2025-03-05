@@ -8,7 +8,6 @@
 
   import { useQuery } from '$lib/zero/query.svelte';
   import { z } from '$lib/zero/z.svelte';
-  import { fade } from 'svelte/transition';
   import { ulid } from 'ulid';
 
   const chatId = $derived(page.params.chatId);
@@ -71,9 +70,6 @@
     }
   })
 
-  const fadeIn = { delay: 50, duration: 50 };
-  const fadeOut = { delay: 0, duration: 50 };
-
   const isLoggedIn = $derived(z.current.userID !== 'anon');
   const isNewChat = $derived(chat.current === undefined);
   const canWrite = $derived(chat.current?.chatAccess.some(access => access.userId === z.current.userID) || z.current.userID === chat.current?.userId);
@@ -87,7 +83,7 @@
   <Card>
     <div class='flex items-center justify-between'>
       {#key chat.current?.title}
-        <h2 class='text-xl md:text-2xl font-bold truncate' in:fade={fadeIn} out:fade={fadeOut}>
+        <h2 class='text-xl md:text-2xl font-bold truncate'>
           {chat.current?.title ?? 'New Chat'}
         </h2>
       {/key}
