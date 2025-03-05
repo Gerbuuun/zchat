@@ -60,6 +60,10 @@
       <p class='text-gray-600 text-center max-w-md'>
         Use Cmd/Ctrl + K to search and use shortcuts.
       </p>
+
+      <p class='text-gray-600 text-center max-w-md text-balance'>
+        Use Cmd/Ctrl + Up and Down to quickly switch between chats.
+      </p>
     {:else}
       <a
         href='/api/auth'

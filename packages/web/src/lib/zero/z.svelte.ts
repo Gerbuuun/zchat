@@ -1,4 +1,3 @@
-// @ts-expect-error This environment variable is set via SST
 import { PUBLIC_ZERO_SERVER } from '$env/static/public';
 import { schema } from '$lib/zero/schema';
 import { Z } from 'zero-svelte';

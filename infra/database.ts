@@ -39,12 +39,12 @@ export const provider = new postgresql.Provider('DatabasePostgresProvider', {
   password: db.password,
 });
 
-// Create the cvr database
-new postgresql.Database('CvrDatabase', {
-  name: $interpolate`${db.database}_cvr`,
-}, { provider });
+// // Create the cvr database
+// new postgresql.Database('CvrDatabase', {
+//   name: $interpolate`${db.database}_cvr`,
+// }, { provider });
 
-// Create the change database
-new postgresql.Database('ChangeDatabase', {
-  name: $interpolate`${db.database}_change`,
-}, { provider });
+// // Create the change database
+// new postgresql.Database('ChangeDatabase', {
+//   name: $interpolate`${db.database}_change`,
+// }, { provider });

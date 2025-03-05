@@ -65,6 +65,12 @@
     }
   }
 
+  $effect(() => {
+    if (page.params.chatId) {
+      animate = false;
+    }
+  })
+
   const fadeIn = { delay: 50, duration: 50 };
   const fadeOut = { delay: 0, duration: 50 };
 

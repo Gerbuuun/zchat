@@ -1,1 +1,0 @@
-import{t as i,a as s}from"./DqkJwZYL.js";import{i as t,r as e}from"./DXlRHvn5.js";import{s as p}from"./BQ3ExOcy.js";var m=i('<div class="bg-white rounded-lg shadow p-2 md:p-4"><!></div>');function c(a,o){var r=m(),d=t(r);p(d,()=>o.children),e(r),s(a,r)}export{c as C};
