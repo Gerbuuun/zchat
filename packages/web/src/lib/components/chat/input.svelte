@@ -1,4 +1,7 @@
 <script lang='ts'>
+  import { useQuery } from "$lib/zero/query.svelte";
+  import { z } from '$lib/zero/z.svelte';
+
   const {
     submit,
     locked = false,
@@ -6,6 +9,9 @@
 
   let message = $state('');
   let textarea: HTMLTextAreaElement;
+
+  const messages = useQuery(() => z.current.query.messages.where('userId', z.current.userID));
+  const reachedMessageLimit = $derived(messages.current.length >= 20);
 
   function handleKeydown(event: KeyboardEvent) {
     // Submit on Enter (without Shift)
@@ -16,7 +22,7 @@
   }
 
   async function submitMessage() {
-    if (!message.trim() || locked)
+    if (!message.trim() || locked || reachedMessageLimit)
       return;
 
     submit(message.trim());
@@ -55,10 +61,10 @@
       </div>
       <button
         onclick={submitMessage}
-        disabled={!message.trim() || locked}
+        disabled={!message.trim() || locked || reachedMessageLimit}
         class='px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed order-1 sm:order-2 w-full sm:w-auto'
       >
-        {locked ? 'Generating response...' : 'Send'}
+        {locked ? 'Generating response...' : reachedMessageLimit ? 'Message limit reached' : 'Send'}
       </button>
     </div>
   </div>
