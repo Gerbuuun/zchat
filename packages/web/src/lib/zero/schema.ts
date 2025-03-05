@@ -105,7 +105,7 @@ const chatRelationships = relationships(chat, ({ many, one }) => ({
   }),
 }));
 
-const messageRelationships = relationships(message, ({ one, many }) => ({
+const messageRelationships = relationships(message, ({ one }) => ({
   chat: one({
     sourceField: ['chatId'],
     destField: ['id'],

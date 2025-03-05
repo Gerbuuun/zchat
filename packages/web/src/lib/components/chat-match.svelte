@@ -1,6 +1,6 @@
 <script lang='ts'>
-  import { MessagesSquareIcon, MessageSquareTextIcon } from 'lucide-svelte';
   import { z } from '$lib/zero/z.svelte';
+  import { MessageSquareTextIcon, MessagesSquareIcon } from 'lucide-svelte';
 
   interface Props {
     chat: {

@@ -1,10 +1,11 @@
 <script lang='ts'>
   import { page } from '$app/state';
-  import { Copy, Share2, X } from 'lucide-svelte';
 
   import { showToast } from '$lib/toaster';
   import { useQuery } from '$lib/zero/query.svelte';
   import { z } from '$lib/zero/z.svelte';
+
+  import { Copy, Share2, X } from 'lucide-svelte';
   import { ulid } from 'ulid';
 
   const { chatId }: { chatId: string } = $props();

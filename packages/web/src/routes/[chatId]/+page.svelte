@@ -11,13 +11,30 @@
   import { ulid } from 'ulid';
 
   const chatId = $derived(page.params.chatId);
-  let animate = $state(false);
 
   const chat = useQuery(() => z.current.query.chats
     .where('id', chatId)
     .related('chatAccess', q => q.related('user'))
     .one(),
   );
+
+  let animate = $state(false);
+  let chatContainer = $state<HTMLDivElement | null>(null);
+
+  $effect(() => {
+    if (chat.current) {
+      chatContainer?.scrollTo({
+        top: chatContainer.scrollHeight,
+        behavior: 'instant',
+      });
+    }
+  });
+
+  $effect(() => {
+    if (page.params.chatId) {
+      animate = false;
+    }
+  });
 
   function handleSubmit(message: string) {
     try {
@@ -47,20 +64,12 @@
         id: chatId,
         locked: true,
       });
-
-      animate = true;
     }
     catch (error) {
       console.error(error);
       showToast('Something went wrong while sending the message');
     }
   }
-
-  $effect(() => {
-    if (page.params.chatId) {
-      animate = false;
-    }
-  })
 
   const isLoggedIn = $derived(z.current.userID !== 'anon');
   const isNewChat = $derived(chat.current === undefined);
@@ -71,48 +80,48 @@
   <title>ZChat - {chat.current?.title ?? 'New Chat'}</title>
 </svelte:head>
 
-<div class='flex flex-col h-[calc(100dvh-88px)] md:h-[calc(100dvh-112px)] space-y-2 md:space-y-6 max-w-7xl mx-auto'>
-  <Card>
-    <div class='flex items-center justify-between'>
-      {#key chat.current?.title}
-        <h2 class='text-xl md:text-2xl font-bold truncate'>
-          {chat.current?.title ?? 'New Chat'}
-        </h2>
-      {/key}
+<div class='overflow-y-auto h-full p-2 md:p-6' bind:this={chatContainer}>
+  <div class='flex flex-col gap-y-2 md:gap-y-6 max-w-7xl mx-auto min-h-full'>
+    <Card class='sticky top-0 w-full'>
+      <div class='flex items-center justify-between'>
+        {#key chat.current?.title}
+          <h2 class='text-xl md:text-2xl font-bold truncate'>
+            {chat.current?.title ?? 'New Chat'}
+          </h2>
+        {/key}
 
-      <div class='flex items-center gap-2'>
-        <div class='hidden md:flex -space-x-2 overflow-hidden'>
-          {#each chat.current?.chatAccess ?? [] as share}
-            {#if share.user}
-              <div class='inline-block size-8 rounded-full ring-2 ring-white overflow-hidden bg-gray-200'>
-                <img
-                  src={`https://github.com/${share.user.username}.png`}
-                  alt={share.user.name || 'User'}
-                  class='h-full w-full object-cover'
-                />
-              </div>
-            {/if}
-          {/each}
+        <div class='flex items-center gap-2'>
+          <div class='hidden md:flex -space-x-2 overflow-hidden'>
+            {#each chat.current?.chatAccess ?? [] as share}
+              {#if share.user}
+                <div class='inline-block size-8 rounded-full ring-2 ring-white overflow-hidden bg-gray-200'>
+                  <img
+                    src={`https://github.com/${share.user.username}.png`}
+                    alt={share.user.name || 'User'}
+                    class='h-full w-full object-cover'
+                  />
+                </div>
+              {/if}
+            {/each}
+          </div>
+
+          <ChatUsers {chatId} />
         </div>
-
-        <ChatUsers {chatId} />
       </div>
-    </div>
-  </Card>
-
-  <ChatMessages {chatId} {animate} />
-
-  {#if isLoggedIn}
-    {#if canWrite || isNewChat}
-      <ChatInput submit={handleSubmit} locked={chat.current?.locked} />
-    {:else}
-      <Card>
-        <h2>You don't have write access to this chat</h2>
-      </Card>
-    {/if}
-  {:else}
-    <Card>
-      <h2>You must be logged in to chat</h2>
     </Card>
-  {/if}
+
+    <ChatMessages {chatId} {animate} />
+
+    <Card class='sticky bottom-0 w-full'>
+      {#if isLoggedIn}
+        {#if canWrite || isNewChat}
+          <ChatInput submit={handleSubmit} locked={chat.current?.locked} />
+        {:else}
+          <h2>You don't have write access to this chat</h2>
+        {/if}
+      {:else}
+        <h2>You must be logged in to chat</h2>
+      {/if}
+    </Card>
+  </div>
 </div>

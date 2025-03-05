@@ -1,19 +1,19 @@
 <script lang='ts'>
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
+
   import ChatMatch from '$lib/components/chat-match.svelte';
-
-  import {
-    MessagesSquareIcon,
-    X,
-    Pencil,
-    Search,
-    Share2,
-  } from 'lucide-svelte';
-
   import { showToast } from '$lib/toaster';
   import { useQuery } from '$lib/zero/query.svelte';
   import { z } from '$lib/zero/z.svelte';
+
+  import {
+    MessagesSquareIcon,
+    Pencil,
+    Search,
+    Share2,
+    X,
+  } from 'lucide-svelte';
   import { onMount } from 'svelte';
   import { ulid } from 'ulid';
 

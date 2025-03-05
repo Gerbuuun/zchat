@@ -1,15 +1,15 @@
 <script lang='ts'>
   import { goto } from '$app/navigation';
-  import { Plus } from 'lucide-svelte';
-  import { ulid } from 'ulid';
-
   import Card from '$lib/components/card.svelte';
   import Github from '$lib/components/github-icon.svelte';
+
+  import { Plus } from 'lucide-svelte';
+  import { ulid } from 'ulid';
 
   const loggedIn = $derived(!!document.cookie.split('; ').find(row => row.startsWith('auth='))?.split('=')[1]);
 </script>
 
-<Card>
+<Card class='m-2 md:m-6'>
   <div class='flex flex-col items-center justify-center p-2 md:p-6 space-y-8 h-full'>
     <h1 class='text-3xl font-bold text-gray-800'>Welcome to ZChat!</h1>
 
@@ -56,7 +56,7 @@
         <span class='px-4 text-gray-500 text-sm'>or</span>
         <div class='flex-grow h-px bg-gray-300'></div>
       </div>
-  
+
       <p class='text-gray-600 text-center max-w-md'>
         Use Cmd/Ctrl + K to search and use shortcuts.
       </p>

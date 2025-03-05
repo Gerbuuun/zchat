@@ -1,17 +1,17 @@
 <script lang='ts'>
+  import type { Chat } from '$lib/zero/schema';
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
-  import { onMount } from 'svelte';
-  
+
   import Github from '$lib/components/github-icon.svelte';
   import Search from '$lib/components/search.svelte';
-  import type { Chat } from '$lib/zero/schema';
   import { useQuery } from '$lib/zero/query.svelte';
   import { z } from '$lib/zero/z.svelte';
+  import { Menu, MessageSquareTextIcon, MessagesSquareIcon, Plus, Power, X } from 'lucide-svelte';
 
-  import { X, Menu, MessageSquareTextIcon, MessagesSquareIcon, Plus, Power } from 'lucide-svelte';
+  import { onMount } from 'svelte';
   import { ulid } from 'ulid';
-  
+
   import '../app.css';
 
   const { children } = $props();
@@ -41,31 +41,43 @@
 
   // Handle keyboard shortcuts for navigating between chats
   function handleKeydown(event: KeyboardEvent) {
-    if (!(event.metaKey || event.ctrlKey)) return;
-    if (allChats.length === 0) return;
-    
+    if (!(event.metaKey || event.ctrlKey))
+      return;
+    if (allChats.length === 0)
+      return;
+
     // Find current chat index
     const currentIndex = allChats.findIndex(chat => chat.id === page.params.chatId);
-    
+
     if (event.key === 'ArrowUp') {
       event.preventDefault();
       if (currentIndex > 0) {
         goto(`/${allChats[currentIndex - 1].id}`);
-      } else if (currentIndex === -1) {
+      }
+      else if (currentIndex === -1) {
         goto(`/${allChats[0].id}`);
-      } else {
+      }
+      else {
         goto(`/${allChats[allChats.length - 1].id}`);
       }
-    } else if (event.key === 'ArrowDown') {
+    }
+    else if (event.key === 'ArrowDown') {
       event.preventDefault();
       if (currentIndex >= 0 && currentIndex < allChats.length - 1) {
         goto(`/${allChats[currentIndex + 1].id}`);
-      } else {
+      }
+      else {
         goto(`/${allChats[0].id}`);
       }
     }
   }
-  
+
+  $effect(() => {
+    if (page.url) {
+      sidebarOpen = false;
+    }
+  });
+
   onMount(() => {
     window.addEventListener('keydown', handleKeydown);
     return () => {
@@ -149,7 +161,7 @@
   </aside>
 
   <!-- Main content -->
-  <div class='fixed inset-0 flex flex-col flex-1 md:ml-64'>
+  <div class='fixed inset-0 md:ml-64 flex flex-col flex-1'>
     <header class='bg-white shadow-sm'>
       <div class='flex items-center h-16 px-4 gap-4'>
         <!-- Mobile menu button -->
@@ -200,7 +212,7 @@
     </header>
 
     <!-- Page content -->
-    <main class='p-2 md:p-6 space-y-2 md:space-y-6 flex-1 overflow-y-auto overflow-x-hidden'>
+    <main class='overflow-x-hidden h-full'>
       {@render children()}
     </main>
   </div>
