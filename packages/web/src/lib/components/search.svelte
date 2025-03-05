@@ -32,10 +32,10 @@
   //   .where(q =>
   //     q.or(
   //       q.cmp('title', 'ILIKE', `%${search}%`),
-  //       q.exists('messages', q => q.whereExists('chunks', q => q.where('content', 'ILIKE', `%${search}%`))),
+  //       q.exists('messages', q => q.where('content', 'ILIKE', `%${search}%`))),
   //     )
   //   )
-  //   .related('messages', q => q.related('chunks'))
+  //   .related('messages')
   // );
 
   // Doing this way because of a potential bug when using multiple LIKE queries and OR conditions
@@ -48,7 +48,7 @@
       ),
     )
     .where('title', 'ILIKE', `%${search}%`)
-    .related('messages', q => q.related('chunks')));
+    .related('messages'));
   const messages = useQuery(() => z.current.query.messages
     .whereExists('chat', q =>
       q.where(q =>
@@ -57,8 +57,7 @@
           q.exists('chatAccess', q => q.where('userId', z.current.userID)),
         ),
       ))
-    .whereExists('chunks', q => q.where('content', 'ILIKE', `%${search}%`))
-    .related('chunks')
+    .where('content', 'ILIKE', `%${search}%`)
     .related('chat'),
   );
 
@@ -66,7 +65,7 @@
     ...chats.current.map(c => c.id),
     ...messages.current.map(m => m.chatId),
   ]));
-  const matchedChats = useQuery(() => z.current.query.chats.where('id', 'IN', Array.from(chatIds)).related('messages', q => q.related('chunks')));
+  const matchedChats = useQuery(() => z.current.query.chats.where('id', 'IN', Array.from(chatIds)).related('messages'));
 
   // Modal shortcuts
   function handleKeydown(event: KeyboardEvent) {

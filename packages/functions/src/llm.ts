@@ -1,8 +1,8 @@
 import { OpenAI } from 'openai';
 import { Resource } from 'sst';
-import { eq, sql } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { ulid } from 'ulid';
-import { getDB, chats, messageChunks, messages } from 'zchat-database';
+import { getDB, chats, messages } from 'zchat-database';
 
 export async function handler(event: any) {
   const { chatId } = event;
@@ -11,15 +11,9 @@ export async function handler(event: any) {
   try {
     // Get all previous messages for context
     const chatMessages = await db
-      .select({
-        id: messages.id,
-        role: messages.role,
-        content: sql<string>`string_agg(${messageChunks.content}, '')`.as('content'),
-      })
+      .select()
       .from(messages)
-      .where(eq(messages.chatId, chatId))
-      .innerJoin(messageChunks, eq(messages.id, messageChunks.messageId))
-      .groupBy(messages.id);
+      .where(eq(messages.chatId, chatId));
 
     // Create AI message in database first
     // TODO: Also do this on the client side for even more local first feel
@@ -28,6 +22,7 @@ export async function handler(event: any) {
       id: assistantMessageId,
       chatId,
       role: 'assistant',
+      content: '',
       createdAt: new Date(),
     });
 
@@ -60,8 +55,7 @@ export async function streamChunkedParagraphs(db: ReturnType<typeof getDB>, mess
   const openai = new OpenAI({ apiKey: Resource.OPENAI_API_KEY.value });
 
   try {
-    let currentChunkContent = '';
-    let chunkIndex = 0;
+    let content = '';
 
     // Create streaming completion
     const completion = await openai.chat.completions.create({
@@ -72,35 +66,14 @@ export async function streamChunkedParagraphs(db: ReturnType<typeof getDB>, mess
 
     // Process the stream
     for await (const chunk of completion) {
-      const content = chunk.choices[0]?.delta?.content || '';
+      const contentChunk = chunk.choices[0]?.delta?.content || '';
 
-      if (content) {
-        currentChunkContent += content;
+      if (contentChunk) {
+        content += contentChunk;
 
-        // Check if we have a complete paragraph (ends with newline or period)
-        if (content.includes('\n\n') || (content.endsWith('.') && currentChunkContent.length > 180)) {
-          // Save paragraph to database
-          await db.insert(messageChunks).values({
-            messageId,
-            index: chunkIndex++,
-            content: currentChunkContent,
-          });
-
-          // Reset paragraph
-          currentChunkContent = '';
-        }
+        await db.update(messages).set({ content }).where(eq(messages.id, messageId));
       }
     }
-
-    // Save any remaining content as the final chunk
-    if (currentChunkContent) {
-      await db.insert(messageChunks).values({
-        messageId,
-        index: chunkIndex,
-        content: currentChunkContent,
-      });
-    }
-
     return true;
   }
   catch (error) {

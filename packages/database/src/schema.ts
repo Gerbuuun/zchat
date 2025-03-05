@@ -1,4 +1,4 @@
-import { index, pgTable, primaryKey, uniqueIndex } from 'drizzle-orm/pg-core';
+import { index, pgTable, uniqueIndex } from 'drizzle-orm/pg-core';
 
 // User table
 export const users = pgTable(
@@ -56,23 +56,11 @@ export const messages = pgTable(
     chatId: t.text().notNull().references(() => chats.id, { onDelete: 'cascade' }),
     userId: t.text().references(() => users.id, { onDelete: 'cascade' }),
     role: t.text({ enum: ['user', 'assistant'] }).notNull(),
+    content: t.text().notNull(),
     createdAt: t.timestamp().notNull(),
   }),
   table => [
     index().on(table.chatId),
     index().on(table.userId),
-  ],
-);
-
-// Message chunk table
-export const messageChunks = pgTable(
-  'message_chunks',
-  t => ({
-    messageId: t.text().notNull().references(() => messages.id, { onDelete: 'cascade' }),
-    index: t.integer().notNull(),
-    content: t.text().notNull(),
-  }),
-  table => [
-    primaryKey({ columns: [table.messageId, table.index] }),
   ],
 );

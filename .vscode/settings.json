@@ -46,5 +46,7 @@
     "scss",
     "pcss",
     "postcss"
-  ]
+  ],
+
+  "svelte.plugin.svelte.enable": false
 }

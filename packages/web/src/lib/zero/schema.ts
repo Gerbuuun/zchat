@@ -50,17 +50,10 @@ const message = table('messages')
     chatId: string(),
     userId: string().optional(),
     role: enumeration(),
+    content: string(),
     createdAt: number(),
   })
   .primaryKey('id');
-
-const messageChunk = table('message_chunks')
-  .columns({
-    messageId: string(),
-    index: number(),
-    content: string(),
-  })
-  .primaryKey('messageId', 'index');
 
 // Define relationships
 const usersRelationships = relationships(users, ({ many }) => ({
@@ -123,19 +116,6 @@ const messageRelationships = relationships(message, ({ one, many }) => ({
     destField: ['id'],
     destSchema: users,
   }),
-  chunks: many({
-    sourceField: ['id'],
-    destField: ['messageId'],
-    destSchema: messageChunk,
-  }),
-}));
-
-const messageChunkRelationships = relationships(messageChunk, ({ one }) => ({
-  message: one({
-    sourceField: ['messageId'],
-    destField: ['id'],
-    destSchema: message,
-  }),
 }));
 
 export const schema = createSchema(1, {
@@ -144,14 +124,12 @@ export const schema = createSchema(1, {
     message,
     chatAccess,
     users,
-    messageChunk,
   ],
   relationships: [
     chatRelationships,
     messageRelationships,
     chatAccessRelationships,
     usersRelationships,
-    messageChunkRelationships,
   ],
 });
 
@@ -159,7 +137,6 @@ type Schema = typeof schema;
 export type Chat = Row<typeof schema.tables.chats>;
 export type ChatAccess = Row<typeof schema.tables.chat_access>;
 export type Message = Row<typeof schema.tables.messages>;
-export type MessageChunk = Row<typeof schema.tables.message_chunks>;
 export type User = Row<typeof schema.tables.users>;
 
 interface AuthData {
@@ -208,21 +185,6 @@ function canReadMessages(authData: AuthData, eb: ExpressionBuilder<Schema, 'mess
   return eb.exists('chat', q => q.where(eq => canReadChat(authData, eq)));
 }
 
-// Message Chunks
-function canReadMessageChunks(authData: AuthData, eb: ExpressionBuilder<Schema, 'message_chunks'>) {
-  return eb.exists('message', q => q.where(eq => canReadMessages(authData, eq)));
-}
-
-function canWriteMessageChunks(authData: AuthData, eb: ExpressionBuilder<Schema, 'message_chunks'>) {
-  return eb.exists('message', q =>
-    q.where(eq =>
-      eq.and(
-        eq.cmp('userId', authData.sub),
-        eq.exists('chat', eq => eq.where('locked', false)),
-      ),
-    ));
-}
-
 export const permissions = definePermissions<AuthData, typeof schema>(schema, () => ({
   users: {
     row: {
@@ -266,17 +228,6 @@ export const permissions = definePermissions<AuthData, typeof schema>(schema, ()
         postMutation: [canWriteMessages],
       },
       delete: [canWriteMessages],
-    },
-  },
-  message_chunks: {
-    row: {
-      select: [canReadMessageChunks],
-      insert: [canWriteMessageChunks],
-      update: {
-        preMutation: NOBODY_CAN,
-        postMutation: NOBODY_CAN,
-      },
-      delete: NOBODY_CAN,
     },
   },
 }));

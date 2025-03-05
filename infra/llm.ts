@@ -20,20 +20,16 @@ new postgresql.Extension('DatabaseLambdaExtension', {
 // Create the postgresql function which invokes the lambda function
 new postgresql.Function('DatabaseLambdaTrigger', {
   name: 'rds_lambda_trigger',
-  body: $interpolate`DECLARE
-  new_message record;
-BEGIN
-  SELECT "role", "chatId" FROM messages WHERE id = NEW."messageId" INTO new_message;
-
+  body: $interpolate`BEGIN
   -- Only proceed if the role is 'user'
-  IF new_message.role = 'user' THEN
+  IF NEW.role = 'user' THEN
       -- Invoke Lambda function with the new row data
       PERFORM aws_lambda.invoke(
           aws_commons.create_lambda_function_arn(
               '${llmFunction.arn}',
               '${$app.providers!.aws.region}'
           ),
-          json_build_object('chatId', new_message."chatId"),
+          json_build_object('chatId', NEW."chatId"),
           'Event'
       );
   END IF;

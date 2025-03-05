@@ -15,6 +15,13 @@
       "when": 1741039132834,
       "tag": "0001_adorable_lenny_balinger",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1741183025547,
+      "tag": "0002_old_praxagora",
+      "breakpoints": true
     }
   ]
 }

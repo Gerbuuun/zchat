@@ -15,36 +15,15 @@
     animate?: boolean;
   } = $props();
 
-  const messages = useQuery(() =>
-    z.current.query.messages
-      .where('chatId', chatId)
-      .related('chunks')
-      .related('user'),
-  );
+  const messages = useQuery(() => z.current.query.messages.where('chatId', chatId).related('user'));
 
   let chatContainer = $state<HTMLDivElement | null>(null);
-
-  // function scrollToLastMessage() {
-  //   if (!chatContainer) return;
-    
-  //   // Calculate the position that puts the last message at the top
-  //   const lastMessage = chatContainer.lastElementChild;
-  //   if (!lastMessage) return;
-    
-  //   const lastMessageHeight = lastMessage.clientHeight;
-  //   const scrollPosition = chatContainer.scrollHeight - lastMessageHeight - 24;
-    
-  //   chatContainer.scrollTo({
-  //     top: Math.max(0, scrollPosition),
-  //     behavior: animate ? 'smooth' : 'instant',
-  //   });
-  // }
 
   $effect(() => {
     if (messages.current.length) {
       chatContainer?.scrollTo({
         top: chatContainer.scrollHeight,
-        behavior: animate ? 'smooth' : 'instant',
+        behavior: 'instant',
       });
     }
   });
@@ -78,8 +57,8 @@
         </span>
       </p>
 
-      <div class='prose prose-sm md:prose-base marker:text-gray-700 overflow-x-scroll'>
-        <Markdown content={message.chunks.map(chunk => chunk.content).join('')} />
+      <div class='prose prose-sm md:prose-base marker:text-gray-700 overflow-x-scroll max-w-full'>
+        <Markdown content={message.content} />
       </div>
     </div>
   {/each}

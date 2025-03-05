@@ -8,9 +8,7 @@
       description: string | null;
       userId: string;
       messages: Readonly<{
-        chunks: Readonly<{
-          content: string;
-        }[]>;
+        content: string;
       }[]>;
     };
     search: string;
@@ -46,11 +44,9 @@
       {/if}
     </h4>
     {#if chat.messages && chat.messages.length > 0}
-      {@const matchingChunk = chat.messages.flatMap(m => m.chunks || []).find(chunk =>
-        chunk.content.toLowerCase().includes(search.toLowerCase()),
-      )}
-      {#if matchingChunk}
-        {@const parts = matchingChunk.content.split(new RegExp(`(${search})`, 'i'))}
+      {@const matchingMessage = chat.messages.find(msg => msg.content.toLowerCase().includes(search.toLowerCase()))}
+      {#if matchingMessage}
+        {@const parts = matchingMessage.content.split(new RegExp(`(${search})`, 'i'))}
         <p class='text-sm text-gray-500 line-clamp-2'>
           {#each parts as part}
             {#if part.toLowerCase() === search.toLowerCase()}

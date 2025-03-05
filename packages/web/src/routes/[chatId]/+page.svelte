@@ -33,21 +33,13 @@
         });
       }
 
-      // Create the message and message chunk in a single transaction
-      const messageId = ulid();
-      z.current.mutateBatch((tx) => {
-        tx.messages.insert({
-          id: messageId,
-          chatId,
-          role: 'user',
-          createdAt: Date.now(),
-          userId: z.current.userID,
-        });
-        tx.message_chunks.insert({
-          messageId,
-          index: 0,
-          content: message,
-        });
+      z.current.mutate.messages.insert({
+        id: ulid(),
+        chatId,
+        role: 'user',
+        content: message,
+        createdAt: Date.now(),
+        userId: z.current.userID,
       });
 
       // Lock the chat to prevent other users from writing to it while we're generating the response
@@ -79,7 +71,7 @@
   <title>ZChat - {chat.current?.title ?? 'New Chat'}</title>
 </svelte:head>
 
-<div class='flex flex-col h-[calc(100dvh-88px)] md:h-[calc(100dvh-112px)] space-y-2 md:space-y-6'>
+<div class='flex flex-col h-[calc(100dvh-88px)] md:h-[calc(100dvh-112px)] space-y-2 md:space-y-6 max-w-7xl mx-auto'>
   <Card>
     <div class='flex items-center justify-between'>
       {#key chat.current?.title}

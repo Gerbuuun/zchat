@@ -1,8 +1,9 @@
 <script lang='ts'>
   import { goto } from '$app/navigation';
   import { page } from '$app/state';
+  import { onMount } from 'svelte';
+  
   import Github from '$lib/components/github-icon.svelte';
-
   import Search from '$lib/components/search.svelte';
   import type { Chat } from '$lib/zero/schema';
   import { useQuery } from '$lib/zero/query.svelte';
@@ -10,8 +11,8 @@
 
   import { X, Menu, MessageSquareTextIcon, MessagesSquareIcon, Plus, Power } from 'lucide-svelte';
   import { ulid } from 'ulid';
+  
   import '../app.css';
-    import { onMount } from 'svelte';
 
   const { children } = $props();
 
@@ -24,7 +25,7 @@
       q.cmp('userId', z.current.userID),
       q.exists('chatAccess', q => q.where('userId', z.current.userID)),
     ))
-    .related('messages', q => q.related('chunks'))
+    .related('messages')
     .related('chatAccess')
     .related('user')
     .preload();
@@ -84,7 +85,7 @@
       <h2 class='text-sm uppercase tracking-wider text-gray-400 font-semibold px-2 mb-2'>
         {label}
       </h2>
-      <ul class='space-y-2'>
+      <ul>
         {#each chats as chat}
           <li>
             <a
@@ -100,7 +101,7 @@
                 {:else}
                   <MessagesSquareIcon size={20} />
                 {/if}
-                {chat.title}
+                <span class='truncate'>{chat.title}</span>
               </span>
             </a>
           </li>
