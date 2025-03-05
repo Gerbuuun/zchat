@@ -10,7 +10,10 @@
   let message = $state('');
   let textarea: HTMLTextAreaElement;
 
-  const messages = useQuery(() => z.current.query.messages.where('userId', z.current.userID));
+  const messages = useQuery(() => z.current.query.messages
+    .where('userId', z.current.userID)
+    .where('createdAt', '>', Date.now() - 1000 * 60 * 60 * 24)
+  );
   const reachedMessageLimit = $derived(messages.current.length >= 20);
 
   function handleKeydown(event: KeyboardEvent) {
