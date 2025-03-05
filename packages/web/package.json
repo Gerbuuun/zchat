@@ -1,0 +1,32 @@
+{
+  "name": "zchat-web",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "pnpm@10.5.2",
+  "scripts": {
+    "build": "vite build",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "dev": "vite dev",
+    "dev:zero-cache": "npx zero-cache",
+    "prepare": "svelte-kit sync || echo ''",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@rocicorp/zero": "^0.16.2025022800",
+    "@sveltejs/adapter-static": "^3.0.8",
+    "@sveltejs/kit": "^2.17.3",
+    "@sveltejs/vite-plugin-svelte": "^5.0.3",
+    "@tailwindcss/vite": "^4.0.9",
+    "lucide-svelte": "^0.477.0",
+    "micromark": "^4.0.2",
+    "micromark-extension-gfm": "^3.0.0",
+    "micromark-extension-gfm-table": "^2.1.1",
+    "svelte": "^5.22.0",
+    "svelte-check": "^4.1.4",
+    "tailwindcss": "^4.0.9",
+    "vite": "^6.2.0",
+    "zero-svelte": "^0.2.0"
+  }
+}

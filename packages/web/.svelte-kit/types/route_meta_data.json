@@ -1,0 +1,9 @@
+{
+	"/": [
+		"src/routes/+layout.ts",
+		"src/routes/+layout.ts"
+	],
+	"/[chatId]": [
+		"src/routes/+layout.ts"
+	]
+}

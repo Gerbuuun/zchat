@@ -1,0 +1,1 @@
+export const env={"PUBLIC_ZERO_SERVER":"https://zchat-zero.grbn.dev"}
