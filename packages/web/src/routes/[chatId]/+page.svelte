@@ -3,7 +3,7 @@
   import Card from '$lib/components/card.svelte';
   import ChatInput from '$lib/components/chat/input.svelte';
   import ChatMessages from '$lib/components/chat/messages.svelte';
-  import ChatUsers from '$lib/components/chat/share.svelte';
+  import ChatShare from '$lib/components/chat/share.svelte';
   import { showToast } from '$lib/toaster';
 
   import { useQuery } from '$lib/zero/query.svelte';
@@ -19,8 +19,6 @@
     .one(),
   );
   const messages = useQuery(() => z.current.query.messages.where('chatId', chatId));
-
-
 
   $effect(() => {
     if (messages.current) {
@@ -102,7 +100,9 @@
             {/each}
           </div>
 
-          <ChatUsers {chatId} />
+          {#if isLoggedIn && !isNewChat}
+            <ChatShare {chatId} />
+          {/if}
         </div>
       </div>
     </Card>

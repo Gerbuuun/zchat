@@ -11,9 +11,7 @@
   const { chatId }: { chatId: string } = $props();
 
   const chat = useQuery(() => z.current.query.chats.where('id', chatId).one());
-  const shares = useQuery(() =>
-    z.current.query.chat_access.where('chatId', chatId).related('user'),
-  );
+  const shares = useQuery(() => z.current.query.chat_access.where('chatId', chatId).related('user'));
 
   let dialogElement: HTMLDialogElement;
   let githubUsername = $state('');
@@ -181,7 +179,7 @@
       <button
         class='p-1 rounded text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600/10'
         aria-label='Copy link'
-        onclick={() => navigator.clipboard.writeText(`${page.url.origin}/chat/${chatId}`).then(() => showToast('Link copied to clipboard'))}
+        onclick={() => navigator.clipboard.writeText(`${page.url.origin}/${chatId}`).then(() => showToast('Link copied to clipboard'))}
       >
         <Copy size={20} />
       </button>
