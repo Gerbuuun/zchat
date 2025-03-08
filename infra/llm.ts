@@ -15,10 +15,13 @@ new postgresql.Extension('DatabaseLambdaExtension', {
   name: 'aws_lambda',
   createCascade: true,
   dropCascade: true,
-}, { provider });
+}, {
+  provider,
+  dependsOn: [db],
+});
 
 // Create the postgresql function which invokes the lambda function
-new postgresql.Function('DatabaseLambdaTrigger', {
+export const lambdaTrigger = new postgresql.Function('DatabaseLambdaTrigger', {
   name: 'rds_lambda_trigger',
   body: $interpolate`BEGIN
   -- Only proceed if the role is 'user'
@@ -38,7 +41,11 @@ END;`,
   language: 'plpgsql',
   schema: 'public',
   returns: 'trigger',
-}, { provider });
+  dropCascade: true,
+}, {
+  provider,
+  dependsOn: [db],
+});
 
 // Create a role for the RDS instance to invoke the Lambda function
 const rdsLambdaTriggerRole = new aws.iam.Role('DatabaseLambdaTriggerRole', {

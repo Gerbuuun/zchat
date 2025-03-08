@@ -178,7 +178,9 @@
         const currentChatId = page.params.chatId;
         modal?.close();
         goto('/');
-        z.current.mutate.chats.delete({ id: currentChatId });
+        if (currentChatId) {
+          z.current.mutate.chats.delete({ id: currentChatId });
+        }
       },
     },
   ];
@@ -256,7 +258,7 @@
     <!-- Desktop search button with text -->
     <button
       type='button'
-      class='hidden md:flex w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-transparent text-left text-gray-500'
+      class='hidden md:flex w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-transparent text-left text-gray-500 dark:text-gray-400'
       onclick={() => modal?.showModal()}
     >
       Search...
@@ -277,12 +279,12 @@
 
   <dialog
     id='searchModal'
-    class='max-h-full md:rounded-lg shadow-lg w-full max-w-xl md:mx-auto md:mt-[20vh] inset-0 h-full m-0 md:h-fit'
+    class='bg-white dark:bg-gray-700 max-h-full md:rounded-lg shadow-lg w-full max-w-xl md:mx-auto md:mt-[20vh] inset-0 h-full m-0 md:h-fit text-gray-500 dark:text-gray-400'
   >
-    <div class='relative p-1 mb-2 border-b border-gray-200'>
+    <div class='relative p-1 mb-2 border-b border-gray-200 dark:border-gray-500'>
       <!-- svelte-ignore a11y_autofocus -->
       <input
-        type='search'
+        type='text'
         bind:value={search}
         placeholder='Type to search...'
         class='w-full pl-10 pr-4 py-2 focus:outline-none focus:border-transparent'
@@ -293,7 +295,7 @@
       </div>
       <div class='absolute right-4 top-3.5 text-gray-400'>
         <button
-          class='text-gray-500 hover:text-gray-700'
+          class='hover:text-gray-700 dark:hover:text-gray-300'
           onclick={() => modal?.close()}
           aria-label='Close search modal'
         >
@@ -304,11 +306,11 @@
 
     <div class='max-h-100 overflow-auto'>
       {#if filteredShortcuts.length > 0}
-        <div class='flex flex-col text-gray-500 p-2'>
+        <div class='flex flex-col p-2'>
           <div class='ps-3 text-sm font-medium pb-1'>Shortcuts</div>
           {#each filteredShortcuts as shortcut, i}
             <button
-              class='flex items-center gap-2 py-1 px-3 rounded-md {isSelected('shortcut', i) ? 'bg-gray-100' : ''} focus:bg-gray-100 focus:outline-none transition-colors duration-200 w-full text-left'
+              class='flex items-center gap-2 py-1 px-3 rounded-md {isSelected('shortcut', i) ? 'bg-gray-100 dark:bg-gray-600' : ''} focus:bg-gray-100 dark:focus:bg-gray-600 focus:outline-none transition-colors duration-200 w-full text-left'
               onclick={shortcut.action}
               data-selected={isSelected('shortcut', i)}
               onmouseover={() => selectedIndex = navigableItems.findIndex(item => item.type === 'shortcut' && item.index === i)}
@@ -330,7 +332,7 @@
                 <li>
                   <a
                     href={`/${chat.id}`}
-                    class='flex items-center gap-2 py-1 px-3 rounded-md {isSelected('chat', i) ? 'bg-gray-100' : ''} focus:bg-gray-100 focus:outline-none transition-colors duration-200 w-full text-left'
+                    class='flex items-center gap-2 py-1 px-3 rounded-md {isSelected('chat', i) ? 'bg-gray-100 dark:bg-gray-600' : ''} focus:bg-gray-100 dark:focus:bg-gray-600 focus:outline-none transition-colors duration-200 w-full text-left'
                     onclick={() => modal?.close()}
                     data-selected={isSelected('chat', i)}
                     onmouseover={() => selectedIndex = navigableItems.findIndex(item => item.type === 'chat' && item.index === i)}

@@ -1,6 +1,6 @@
 import { zeroDomain } from './constants';
-import { jwtSecret } from './secrets';
 import { databaseUrl, db, vpc } from './database';
+import { jwtSecret } from './secrets';
 
 const cluster = new sst.aws.Cluster('Cluster', { vpc, forceUpgrade: 'v2' });
 export const zero = new sst.aws.Service('Zero', {
@@ -30,6 +30,6 @@ export const zero = new sst.aws.Service('Zero', {
     ZERO_CHANGE_DB: $interpolate`${databaseUrl}/${db.database}_change`,
     ZERO_REPLICA_FILE: 'zero.db',
     ZERO_NUM_SYNC_WORKERS: '1',
-    ZERO_AUTH_SECRET: jwtSecret.value,
+    ZERO_AUTH_SECRET: jwtSecret.result,
   },
 });

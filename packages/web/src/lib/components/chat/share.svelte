@@ -81,12 +81,12 @@
       {checked}
       {onchange}
     />
-    <div class="mx-2 relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-2 peer-focus:ring-[#FF3E00] peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#FF3E00]"></div>
+    <div class="mx-2 relative w-11 h-6 bg-gray-200 dark:bg-gray-600 rounded-full peer peer-focus:ring-2 peer-focus:ring-[#FF3E00] peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#FF3E00]"></div>
   </label>
 {/snippet}
 
 <button
-  class='ml-2 p-2 rounded-md flex items-center gap-2 bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
+  class='ml-2 p-2 rounded-md flex items-center gap-2 bg-blue-500 text-white hover:bg-blue-600'
   onclick={() => dialogElement?.showModal()}
   aria-label='Share chat'
 >
@@ -94,11 +94,11 @@
   <span class='hidden md:block'>Share</span>
 </button>
 
-<dialog bind:this={dialogElement} class='max-h-full rounded-lg shadow-lg w-full max-w-xl p-4 md:mx-auto md:mt-[20vh] inset-0 m-0 h-full md:h-fit'>
+<dialog bind:this={dialogElement} class='max-h-full bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg shadow-lg w-full max-w-xl p-4 md:mx-auto md:mt-[20vh] inset-0 m-0 h-full md:h-fit'>
   <div class='flex justify-between items-center mb-4'>
     <h2 class='text-xl font-bold'>Share Chat</h2>
     <button
-      class='text-gray-500 hover:text-gray-700'
+      class='hover:text-gray-700 dark:hover:text-gray-300'
       onclick={() => dialogElement?.close()}
       aria-label='Close'
     >
@@ -107,7 +107,7 @@
   </div>
 
   <div class='mb-4'>
-    <label for='githubUsername' class='block text-sm font-medium text-gray-700 mb-1'>
+    <label for='githubUsername' class='block text-sm font-medium text-gray-700 dark:text-gray-400 mb-1'>
       Add user by github username
     </label>
     <div class='flex'>
@@ -116,7 +116,7 @@
         type='text'
         bind:value={githubUsername}
         placeholder='username'
-        class='flex-1 rounded-l-md border border-gray-300 px-3 py-2 focus:border-[#FF3E00] focus:ring-[#FF3E00] focus:outline-none'
+        class='flex-1 rounded-l-md border border-gray-300 dark:border-gray-600 px-3 py-2 focus:border-[#FF3E00] focus:ring-[#FF3E00] focus:outline-none'
       />
       <button
         class='bg-[#FF3E00] text-white px-4 py-2 rounded-r-md hover:bg-[#FF5722] focus:outline-none focus:ring-2 focus:ring-[#FF3E00] focus:ring-offset-2'
@@ -128,16 +128,16 @@
   </div>
 
   <div class='mb-6'>
-    <h3 class='text-sm font-medium text-gray-700 mb-2'>Currently shared with</h3>
+    <h3 class='text-sm font-medium mb-2'>Currently shared with</h3>
     {#if shares.current.length === 0}
-      <p class='text-sm text-gray-500 italic'>No users have been added yet</p>
+      <p class='text-sm text-gray-500 dark:text-gray-400 italic'>No users have been added yet</p>
     {:else}
-      <ul class='divide-y divide-gray-200'>
+      <ul class='divide-y divide-gray-200 dark:divide-gray-600'>
         {#each shares.current as share}
           {#if share.user}
             <li class='py-3 flex items-center justify-between'>
               <div class='flex items-center'>
-                <div class='size-8 rounded-full overflow-hidden bg-gray-200 mr-3'>
+                <div class='size-8 rounded-full overflow-hidden mr-3'>
                   <img
                     src={`https://github.com/${share.user.username}.png`}
                     alt={share.user.name || 'User'}
@@ -146,7 +146,7 @@
                 </div>
                 <div>
                   <p class='font-medium'>{share.user.name || 'Unknown User'}</p>
-                  <p class='text-sm text-gray-500'>{share.user.username || ''}</p>
+                  <p class='text-sm text-gray-500 dark:text-gray-400'>{share.user.username || ''}</p>
                 </div>
               </div>
               <div class='flex items-center gap-2'>
@@ -154,7 +154,7 @@
                   setWrite(share.id, e.currentTarget.checked);
                 })}
                 <button
-                  class='p-1 rounded text-red-500 hover:bg-red-50'
+                  class='p-1 rounded text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-600/10'
                   aria-label='Remove user'
                   onclick={() => removeShare(share.id)}
                 >
@@ -169,7 +169,7 @@
   </div>
 
   <div class='flex items-center mb-3'>
-    <p class='text-sm font-medium text-gray-700 mr-auto'>Public Access</p>
+    <p class='text-sm font-medium mr-auto'>Public Access</p>
     <div class='flex items-center gap-2'>
       {@render toggle(['Public', 'Private'], chat.current?.public, (e) => {
         z.current.mutate.chats.update({
@@ -179,7 +179,7 @@
       })}
 
       <button
-        class='p-1 rounded text-gray-500 hover:bg-gray-50'
+        class='p-1 rounded text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-600/10'
         aria-label='Copy link'
         onclick={() => navigator.clipboard.writeText(`${page.url.origin}/chat/${chatId}`).then(() => showToast('Link copied to clipboard'))}
       >

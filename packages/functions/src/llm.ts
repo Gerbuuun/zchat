@@ -16,7 +16,6 @@ export async function handler(event: any) {
       .where(eq(messages.chatId, chatId));
 
     // Create AI message in database first
-    // TODO: Also do this on the client side for even more local first feel
     const assistantMessageId = ulid();
     await db.insert(messages).values({
       id: assistantMessageId,

@@ -26,10 +26,6 @@ declare module "sst" {
       "type": "sst.sst.Secret"
       "value": string
     }
-    "JWT_SECRET": {
-      "type": "sst.sst.Secret"
-      "value": string
-    }
     "LLM": {
       "name": string
       "type": "sst.aws.Function"

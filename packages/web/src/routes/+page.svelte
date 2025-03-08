@@ -11,11 +11,11 @@
 
 <Card class='m-2 md:m-6'>
   <div class='flex flex-col items-center justify-center p-2 md:p-6 space-y-8 h-full'>
-    <h1 class='text-3xl font-bold text-gray-800'>Welcome to ZChat!</h1>
+    <h1 class='text-3xl font-bold text-gray-800 dark:text-gray-200'>Welcome to ZChat!</h1>
 
     <div class='w-full max-w-lg'>
-      <h2 class='text-lg font-semibold text-gray-700 mb-3'>About the project</h2>
-      <ul class='bg-gray-50 rounded-lg p-4 space-y-2 text-gray-600 list-disc list-inside'>
+      <h2 class='text-lg font-semibold text-gray-700 dark:text-gray-200 mb-3'>About the project</h2>
+      <ul class='bg-gray-50 dark:bg-gray-600 rounded-lg p-4 space-y-2 text-gray-600 dark:text-gray-200 list-disc list-inside'>
         <li>Svelte frontend deployed on AWS S3</li>
         <li>Zero sync server running on ECS with RDS as database</li>
         <li>Lambda function to generate LLM responses and handle auth</li>
@@ -27,17 +27,17 @@
     </div>
 
     <div class='w-full max-w-lg'>
-      <h2 class='text-lg font-semibold text-gray-700 mb-3'>About the developer</h2>
-      <ul class='bg-gray-50 rounded-lg p-4 space-y-2 text-gray-600 list-disc list-inside'>
+      <h2 class='text-lg font-semibold text-gray-700 dark:text-gray-200 mb-3'>About the developer</h2>
+      <ul class='bg-gray-50 dark:bg-gray-600 rounded-lg p-4 space-y-2 text-gray-600 dark:text-gray-200 list-disc list-inside'>
         <li>24 years old, from the Netherlands</li>
         <li>Recently graduated university as an Electrical Engineer</li>
         <li>Programming too much in his free time</li>
         <li>Looking for a job!</li>
         <li>
-          <a href='mailto:gerbuuun@pm.me' class='text-blue-500 underline' target='_blank'>Email</a>,
-          <a href='https://x.com/gerbuuun' class='text-blue-500 underline' target='_blank'>X/Twitter</a>,
-          <a href='https://bsky.app/profile/grbn.dev' class='text-blue-500 underline' target='_blank'>BlueSky</a>,
-          <a href='https://github.com/gerbuuun' class='text-blue-500 underline' target='_blank'>GitHub</a>
+          <a href='mailto:gerbuuun@pm.me' class='text-blue-500 dark:text-blue-400 underline' target='_blank'>Email</a>,
+          <a href='https://x.com/gerbuuun' class='text-blue-500 dark:text-blue-400 underline' target='_blank'>X/Twitter</a>,
+          <a href='https://bsky.app/profile/grbn.dev' class='text-blue-500 dark:text-blue-400 underline' target='_blank'>BlueSky</a>,
+          <a href='https://github.com/gerbuuun' class='text-blue-500 dark:text-blue-400 underline' target='_blank'>GitHub</a>
         </li>
       </ul>
     </div>
@@ -53,15 +53,15 @@
 
       <div class='w-full max-w-md flex items-center'>
         <div class='flex-grow h-px bg-gray-300'></div>
-        <span class='px-4 text-gray-500 text-sm'>or</span>
+        <span class='px-4 text-gray-500 dark:text-gray-300 text-sm'>or</span>
         <div class='flex-grow h-px bg-gray-300'></div>
       </div>
 
-      <p class='text-gray-600 text-center max-w-md'>
+      <p class='text-gray-600 dark:text-gray-300 text-center max-w-md'>
         Use Cmd/Ctrl + K to search and use shortcuts.
       </p>
 
-      <p class='text-gray-600 text-center max-w-md text-balance'>
+      <p class='text-gray-600 dark:text-gray-300 text-center max-w-md text-balance'>
         Use Cmd/Ctrl + Up and Down to quickly switch between chats.
       </p>
     {:else}
@@ -75,8 +75,8 @@
     {/if}
 
     <div class='w-full max-w-md'>
-      <h2 class='text-lg font-semibold text-gray-700 mb-3'>Features</h2>
-      <ul class='bg-gray-50 rounded-lg p-4 space-y-2 text-gray-600 list-disc list-inside'>
+      <h2 class='text-lg font-semibold text-gray-700 dark:text-gray-200 mb-3'>Features</h2>
+      <ul class='bg-gray-50 dark:bg-gray-600 rounded-lg p-4 space-y-2 text-gray-600 dark:text-gray-200 list-disc list-inside'>
         <li>Instantly search your chat history</li>
         <li>Multi-user chats</li>
         <li>Read and write access control</li>

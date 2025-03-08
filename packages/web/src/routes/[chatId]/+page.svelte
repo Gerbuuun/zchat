@@ -11,18 +11,19 @@
   import { ulid } from 'ulid';
 
   const chatId = $derived(page.params.chatId);
+  let chatContainer = $state<HTMLDivElement | null>(null);
 
   const chat = useQuery(() => z.current.query.chats
     .where('id', chatId)
     .related('chatAccess', q => q.related('user'))
     .one(),
   );
+  const messages = useQuery(() => z.current.query.messages.where('chatId', chatId));
 
-  let animate = $state(false);
-  let chatContainer = $state<HTMLDivElement | null>(null);
+
 
   $effect(() => {
-    if (chat.current) {
+    if (messages.current) {
       chatContainer?.scrollTo({
         top: chatContainer.scrollHeight,
         behavior: 'instant',
@@ -30,33 +31,29 @@
     }
   });
 
-  $effect(() => {
-    if (page.params.chatId) {
-      animate = false;
-    }
-  });
-
-  function handleSubmit(message: string) {
+  async function handleSubmit(message: string) {
     try {
-      if (!chat.current) {
-        z.current.mutate.chats.insert({
-          id: chatId,
-          title: 'New Chat',
-          userId: z.current.userID,
-          public: false,
-          locked: false,
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
-        });
-      }
+      await z.current.mutateBatch(async (tx) => {
+        if (!chat.current) {
+          await tx.chats.insert({
+            id: chatId,
+            title: 'New Chat',
+            userId: z.current.userID,
+            public: false,
+            locked: false,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+          });
+        }
 
-      z.current.mutate.messages.insert({
-        id: ulid(),
-        chatId,
-        role: 'user',
-        content: message,
-        createdAt: Date.now(),
-        userId: z.current.userID,
+        await tx.messages.insert({
+          id: ulid(),
+          chatId,
+          role: 'user',
+          content: message,
+          createdAt: Date.now(),
+          userId: z.current.userID,
+        });
       });
 
       // Lock the chat to prevent other users from writing to it while we're generating the response
@@ -94,7 +91,7 @@
           <div class='hidden md:flex -space-x-2 overflow-hidden'>
             {#each chat.current?.chatAccess ?? [] as share}
               {#if share.user}
-                <div class='inline-block size-8 rounded-full ring-2 ring-white overflow-hidden bg-gray-200'>
+                <div class='inline-block size-8 rounded-full ring-2 ring-white dark:ring-gray-700 overflow-hidden'>
                   <img
                     src={`https://github.com/${share.user.username}.png`}
                     alt={share.user.name || 'User'}
@@ -110,7 +107,7 @@
       </div>
     </Card>
 
-    <ChatMessages {chatId} {animate} />
+    <ChatMessages {chatId} />
 
     <Card class='sticky bottom-0 w-full'>
       {#if isLoggedIn}

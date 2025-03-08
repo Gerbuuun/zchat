@@ -14,6 +14,7 @@ export default $config({
         },
         command: '1.0.2',
         postgresql: '3.14.0',
+        random: '4.18.0',
       },
     };
   },

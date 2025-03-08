@@ -7,7 +7,7 @@
   import Search from '$lib/components/search.svelte';
   import { useQuery } from '$lib/zero/query.svelte';
   import { z } from '$lib/zero/z.svelte';
-  import { Menu, MessageSquareTextIcon, MessagesSquareIcon, Plus, Power, X } from 'lucide-svelte';
+  import { Menu, MessageSquareTextIcon, MessagesSquareIcon, Plus, Power, X, Moon, Sun } from 'lucide-svelte';
 
   import { onMount } from 'svelte';
   import { ulid } from 'ulid';
@@ -17,7 +17,19 @@
   const { children } = $props();
 
   let sidebarOpen = $state(false);
+  let darkMode = $state(localStorage.getItem('darkMode') === 'true');
   const loggedIn = $derived(!!document.cookie.split('; ').find(row => row.startsWith('auth='))?.split('=')[1]);
+  
+  function toggleDarkMode() {
+    darkMode = !darkMode;
+    localStorage.setItem('darkMode', darkMode.toString());
+    document.documentElement.classList.toggle('dark', darkMode);
+  }
+  
+  onMount(() => {
+    // Initialize dark mode based on localStorage
+    document.documentElement.classList.toggle('dark', darkMode);
+  });
 
   // Preload user and shared chats
   z.current.query.chats
@@ -41,9 +53,7 @@
 
   // Handle keyboard shortcuts for navigating between chats
   function handleKeydown(event: KeyboardEvent) {
-    if (!(event.metaKey || event.ctrlKey))
-      return;
-    if (allChats.length === 0)
+    if (!(event.metaKey || event.ctrlKey) || allChats.length === 0)
       return;
 
     // Find current chat index
@@ -70,6 +80,14 @@
         goto(`/${allChats[0].id}`);
       }
     }
+  }
+
+  function handleChatDelete(event: MouseEvent, chat: Chat) {
+    event.preventDefault();
+    event.stopPropagation();
+    z.current.mutate.chats.delete({ id: chat.id });
+    if (page.params.chatId === chat.id)
+      goto('/');
   }
 
   $effect(() => {
@@ -102,18 +120,23 @@
           <li>
             <a
               href={`/${chat.id}`}
-              class="block p-2 rounded hover:bg-gray-700 {page.url
+              class="relative group block p-2 rounded hover:bg-gray-700 {page.url
                 .pathname === `/${chat.id}`
                 ? 'bg-gray-700'
                 : ''}"
             >
               <span class='flex items-center gap-2'>
-                {#if chat.userId === z.current.userID}
-                  <MessageSquareTextIcon size={20} />
-                {:else}
-                  <MessagesSquareIcon size={20} />
-                {/if}
-                <span class='truncate'>{chat.title}</span>
+                <span class='shrink-0'>
+                  {#if chat.userId === z.current.userID}
+                    <MessageSquareTextIcon size={20} />
+                  {:else}
+                    <MessagesSquareIcon size={20} />
+                  {/if}
+                </span>
+                <span class='truncate group-hover:pe-6'>{chat.title}</span>
+                <button class='hidden group-hover:block absolute right-2 top-2' onclick={e => handleChatDelete(e, chat)}>
+                  <X />
+                </button>
               </span>
             </a>
           </li>
@@ -123,9 +146,9 @@
   {/if}
 {/snippet}
 
-<div class='min-h-dvh bg-gray-200'>
+<div class='min-h-dvh bg-gray-200 dark:bg-gray-900 {darkMode ? 'dark' : ''}'>
   <!-- Sidebar (hidden on mobile) -->
-  <aside class='fixed left-0 inset-y-0 z-50 w-64 bg-gray-800 text-white {sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 transition-transform duration-300 ease-in-out'>
+  <aside class='fixed left-0 inset-y-0 z-50 w-64 bg-gray-800 text-white dark:text-gray-300 {sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 transition-transform duration-300 ease-in-out'>
     <div class='h-16 px-4 border-b border-gray-700 flex justify-between items-center'>
 
       <a href='/' class='flex items-center gap-2'>
@@ -162,7 +185,7 @@
 
   <!-- Main content -->
   <div class='fixed inset-0 md:ml-64 flex flex-col flex-1'>
-    <header class='bg-white shadow-sm'>
+    <header class='bg-white dark:bg-gray-700 shadow-sm'>
       <div class='flex items-center h-16 px-4 gap-4'>
         <!-- Mobile menu button -->
         <button
@@ -179,15 +202,23 @@
         <!-- User profile and logout on desktop and mobile -->
         {#if loggedIn}
           <div class='flex items-center gap-4 ml-auto'>
-            <span class='text-sm font-medium text-gray-700 hidden md:inline-block'>
+            <span class='text-sm font-medium text-gray-700 dark:text-gray-300 hidden md:inline-block'>
               {user.current?.name}
             </span>
             <img
               src={`https://github.com/${user.current?.username}.png`}
               alt='Profile'
-              class='size-8 rounded-full object-cover mr-2'
+              class='size-8 rounded-full object-cover'
             />
           </div>
+
+          <button class='p-2 rounded-md text-gray-900 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600' onclick={toggleDarkMode}>
+            {#if darkMode}
+              <Moon />
+            {:else}
+              <Sun />
+            {/if}
+          </button>
 
           <button
             class='p-2 flex flex-row gap-2 items-center rounded-md text-white bg-[#FF3E00] hover:bg-[#FF5722] focus:outline-none focus:ring-2 focus:ring-[#FF3E00]'
