@@ -74,17 +74,7 @@ pnpm sso --sso-session={your-sso-session}
 > [!IMPORTANT]
 > You can't proxy websockets through Cloudflare, so for the Zero instance the proxy is disabled.
 
-Now you can deploy the infrastructure:
+Now you can deploy the infrastructure with a single `sst deploy`. (Note: You need to be root to deploy to production because of the tunnel that needs to be registered.)
 ```bash
-sst deploy --stage production
-```
-
-After the deployment is finished, you need to create the databases for Zero:
-```bash
-pnpm db:create
-```
-
-Last but not least, apply the migrations:
-```bash
-pnpm db:migrate
+sudo sst deploy --stage production
 ```
