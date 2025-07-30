@@ -1,4 +1,4 @@
-# ZChat
+# ZChat (won 3rd place 🎉)
 
 Proof of concept for an LLM-powered chat application built with Zero as requested by [Aaron Boodman](https://github.com/aboodman) on [this twitter thread](https://x.com/aboodman/status/1894758922155888650).
 
